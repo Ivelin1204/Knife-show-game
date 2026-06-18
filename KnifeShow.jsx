@@ -94,7 +94,7 @@ const CRATES = [
 // Difficulty and visual complexity both climb with tier.
 const MAPS = [
   // ── TIER 1 — Practice Yard ──────────────────────────────────────────────
-  { id:"yard", name:"Practice Yard", icon:"🪵", unlockScore:0, speedMod:1.00,
+  { id:"yard", name:"Practice Yard", icon:"🪵", unlockScore:0, speedMod:1.00, coinRate:1,
     blurb:"Where every thrower starts. Plain, calm, forgiving.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -125,7 +125,7 @@ const MAPS = [
     }},
 
   // ── TIER 2 — Exhibition Hall ─────────────────────────────────────────────
-  { id:"hall", name:"Exhibition Hall", icon:"🏛️", unlockScore:15, speedMod:1.12,
+  { id:"hall", name:"Exhibition Hall", icon:"🏛️", unlockScore:15, speedMod:1.12, coinRate:2,
     blurb:"Marble floors and velvet ropes. Crowds are starting to gather.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -161,7 +161,7 @@ const MAPS = [
     }},
 
   // ── TIER 3 — Neon District ────────────────────────────────────────────────
-  { id:"neon", name:"Neon District", icon:"🌆", unlockScore:35, speedMod:1.26,
+  { id:"neon", name:"Neon District", icon:"🌆", unlockScore:35, speedMod:1.26, coinRate:3,
     blurb:"Rooftop throws under a buzzing skyline. Faster. Louder. Brighter.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -214,7 +214,7 @@ const MAPS = [
     }},
 
   // ── TIER 4 — Volcanic Forge ───────────────────────────────────────────────
-  { id:"forge", name:"Volcanic Forge", icon:"🌋", unlockScore:60, speedMod:1.42,
+  { id:"forge", name:"Volcanic Forge", icon:"🌋", unlockScore:60, speedMod:1.42, coinRate:4,
     blurb:"Molten light, hammering heat. Only steady hands survive here.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -268,7 +268,7 @@ const MAPS = [
     }},
 
   // ── TIER 5 — Celestial Arena ─────────────────────────────────────────────
-  { id:"celestial", name:"Celestial Arena", icon:"🌌", unlockScore:100, speedMod:1.60,
+  { id:"celestial", name:"Celestial Arena", icon:"🌌", unlockScore:100, speedMod:1.60, coinRate:5,
     blurb:"The final stage. Stars, gold, and a crowd that never blinks.",
     drawBackground(ctx,W,H,t,CX,CY){
       // Deep space gradient
@@ -441,7 +441,8 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     const W = canvas.width, H = canvas.height;
     const CX = W / 2, LOG_CY = 185, LOG_R = 100, LAUNCH_Y = H - 52;
     const COLL = 12 * Math.PI / 180;            // 12° collision threshold
-    const APPLE_COLL = 16 * Math.PI / 180;       // apple is a bit more forgiving to hit
+    const APPLE_R = LOG_R + 26;                  // apple floats outside the log surface
+    const APPLE_HIT_RADIUS = 24;                  // generous pixel hit-radius around the apple (bigger = easier to hit)
     const knife = KNIVES.find(k => k.id === equippedId) || KNIVES[0];
     const map   = MAPS.find(m => m.id === mapId) || MAPS[0];
     const t0 = Date.now();
@@ -456,6 +457,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
       impactPt: null,        // {x,y,angle} world-space point of last impact, for flash + chip spawn
       apple: null,           // { local, bornAt } — bonus apple stuck to the spinning log, or null
       appleBurst: 0,         // gold sparkle burst counter when apple is hit
+      appleBurstPt: null,    // world {x,y} where the burst sparkles render
     };
     const gs = s.current;
     // Per-stuck-knife settle wobble: index-aligned with gs.stuck.
@@ -603,53 +605,65 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     // Small glossy red apple + stem + leaf, with a soft pulsing glow so it
     // reads clearly as a bonus target against the wood.
     function drawApple(t) {
-      if (!gs.apple) return;
-      const w = gs.apple.local + gs.ang;
-      const ax = CX + Math.cos(w) * (LOG_R - 14);
-      const ay = LOG_CY + Math.sin(w) * (LOG_R - 14);
+      if (gs.apple) {
+        const w = gs.apple.local + gs.ang;
+        const ax = CX + Math.cos(w) * APPLE_R;
+        const ay = LOG_CY + Math.sin(w) * APPLE_R;
+        const SC = 1.6;   // apple is bigger now — easier to see and to hit
 
-      // Soft gold pulse glow behind the apple to draw the eye
-      const pulse = 0.5 + 0.4*Math.sin(t*0.005);
-      const glow = ctx.createRadialGradient(ax,ay,0,ax,ay,22);
-      glow.addColorStop(0, `rgba(255,210,80,${0.35*pulse})`);
-      glow.addColorStop(1, "rgba(255,210,80,0)");
-      ctx.fillStyle = glow;
-      ctx.beginPath(); ctx.arc(ax,ay,22,0,Math.PI*2); ctx.fill();
+        // Soft gold pulse glow behind the apple to draw the eye
+        const pulse = 0.5 + 0.4*Math.sin(t*0.005);
+        const glowR = 30 * SC * 0.7;
+        const glow = ctx.createRadialGradient(ax,ay,0,ax,ay,glowR);
+        glow.addColorStop(0, `rgba(255,210,80,${0.35*pulse})`);
+        glow.addColorStop(1, "rgba(255,210,80,0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(ax,ay,glowR,0,Math.PI*2); ctx.fill();
 
-      ctx.save();
-      ctx.translate(ax, ay);
-      ctx.rotate(w);   // apple "tilts" with the log so the stem always points outward-ish
+        ctx.save();
+        ctx.translate(ax, ay);
+        // NOTE: we intentionally do NOT rotate by `w` here. The apple stays
+        // upright in screen space — stem-and-leaf always pointing straight
+        // up, rounded bottom always facing down toward the log — regardless
+        // of where on the log's rotation it currently sits. This reads much
+        // more clearly as "an apple sitting on the wood" than rotating it
+        // to track the log's spin, which made the stem orientation hard to
+        // parse and didn't look obviously different no matter the flip.
+        ctx.scale(SC, SC);
 
-      // Apple body — two overlapping circles for the classic apple silhouette
-      ctx.fillStyle = "#C23B2E";
-      ctx.beginPath(); ctx.arc(-3,0,8,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(3,0,8,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(0,2,9,0,Math.PI*2); ctx.fill();
+        // Apple body — two overlapping circles for the classic apple silhouette
+        ctx.fillStyle = "#C23B2E";
+        ctx.beginPath(); ctx.arc(-3,0,8,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(3,0,8,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0,2,9,0,Math.PI*2); ctx.fill();
 
-      // Glossy highlight
-      ctx.fillStyle = "rgba(255,255,255,0.35)";
-      ctx.beginPath(); ctx.ellipse(-3,-3,2.6,3.6,0.4,0,Math.PI*2); ctx.fill();
+        // Glossy highlight
+        ctx.fillStyle = "rgba(255,255,255,0.35)";
+        ctx.beginPath(); ctx.ellipse(-3,-3,2.6,3.6,0.4,0,Math.PI*2); ctx.fill();
 
-      // Stem
-      ctx.strokeStyle = "#5C3818"; ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.moveTo(0,-7); ctx.lineTo(1,-12); ctx.stroke();
+        // Stem — points straight up, away from the log
+        ctx.strokeStyle = "#5C3818"; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(0,-7); ctx.lineTo(1,-12); ctx.stroke();
 
-      // Leaf
-      ctx.fillStyle = "#4A9460";
-      ctx.beginPath();
-      ctx.ellipse(4,-11,3.4,1.8,-0.5,0,Math.PI*2);
-      ctx.fill();
+        // Leaf
+        ctx.fillStyle = "#4A9460";
+        ctx.beginPath();
+        ctx.ellipse(4,-11,3.4,1.8,-0.5,0,Math.PI*2);
+        ctx.fill();
 
-      ctx.restore();
+        ctx.restore();
+      }
 
-      // Sparkle burst on collection
-      if (gs.appleBurst > 0) {
+      // Sparkle burst on collection — uses the stored burst point so it still
+      // renders for a few frames even after gs.apple itself is cleared.
+      if (gs.appleBurst > 0 && gs.appleBurstPt) {
+        const { x: bx, y: by } = gs.appleBurstPt;
         for (let i=0;i<8;i++) {
           const sa = (i/8)*Math.PI*2 + t*0.002;
-          const sr = (1 - gs.appleBurst/14) * 26;
+          const sr = (1 - gs.appleBurst/14) * 30;
           ctx.fillStyle = `rgba(255,215,90,${gs.appleBurst/14})`;
           ctx.beginPath();
-          ctx.arc(ax+Math.cos(sa)*sr, ay+Math.sin(sa)*sr, 1.6, 0, Math.PI*2);
+          ctx.arc(bx+Math.cos(sa)*sr, by+Math.sin(sa)*sr, 2, 0, Math.PI*2);
           ctx.fill();
         }
         gs.appleBurst--;
@@ -754,58 +768,60 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
         const f = gs.flying;
         f.y += f.vy; if (f.vy < -2) f.vy += 0.55;
         const dx = f.x - CX, dy = f.y - LOG_CY, dist = Math.sqrt(dx*dx+dy*dy);
-        if (dist <= LOG_R) {
-          const ig = Math.atan2(dy, dx);
 
-          // ── APPLE CHECK (takes priority over knife collision) ───────────
-          // If the apple is present and the throw lands close to its
-          // current spinning position, award coins, fire a sparkle burst,
-          // and consume the throw WITHOUT sticking a knife in the log —
-          // the knife "knocks the apple off" rather than embedding.
-          let appleHit = false;
-          if (gs.apple) {
-            const appleWorld = norm(gs.apple.local + gs.ang);
-            const d = adist(norm(ig), appleWorld);
-            if (d < APPLE_COLL) {
-              appleHit = true;
-              gs.apple = null;
-              gs.appleBurst = 14;
-              gs.flying = null; gs.phase = "idle";
-              gs.impactPt = { angle: ig };
-              spawnChips(ig);
-              triggerShake(3);
-              snd.coin();
-              if (onCoins) onCoins(10);
-              releaseQueuedThrow();
-            }
+        // ── APPLE CHECK — runs FIRST, at its own outward radius ───────────
+        // The apple now floats just outside the log's edge, so the flying
+        // knife reaches it slightly before it would reach the wood itself.
+        // We check this independently of the log-collision distance below,
+        // and skip the log-collision check entirely this frame if it hits.
+        let appleConsumedThrow = false;
+        if (gs.apple) {
+          const appleWorld = norm(gs.apple.local + gs.ang);
+          const ax = CX + Math.cos(appleWorld) * APPLE_R;
+          const ay = LOG_CY + Math.sin(appleWorld) * APPLE_R;
+          const adx = f.x - ax, ady = f.y - ay;
+          const appleDist = Math.sqrt(adx*adx + ady*ady);
+          if (appleDist <= APPLE_HIT_RADIUS) {
+            appleConsumedThrow = true;
+            gs.appleBurstPt = { x: ax, y: ay };
+            gs.apple = null;
+            gs.appleBurst = 14;
+            gs.flying = null; gs.phase = "idle";
+            gs.impactPt = { angle: appleWorld };
+            spawnChips(appleWorld);
+            triggerShake(3);
+            snd.coin();
+            if (onCoins) onCoins(10);
+            releaseQueuedThrow();
           }
+        }
 
-          if (!appleHit) {
-            const { hit, local } = checkHit(ig);
-            if (hit) {
-              gs.over = true; gs.phase = "dead"; gs.flying = null;
-              gs.impactPt = { angle: ig };
-              spawnChips(ig);                    // chips fly even on the fatal hit
-              triggerShake(7);                    // bigger shake — this one hurts
-              gs.flash = 10;
-              queuedThrow = false;                 // game's over, drop any buffered input
-              snd.fail(); onEnd(gs.score, gs.level);
-            } else {
-              gs.stuck.push(local); gs.flying = null; gs.phase = "idle";
-              wobbles[gs.stuck.length-1] = 1;     // new knife starts quivering
-              gs.impactPt = { angle: ig };
-              spawnChips(ig);
-              triggerShake(4);
-              gs.score++; gs.left--; gs.flash = 10; snd.hit();
-              if (gs.left <= 0) {
-                gs.level++; gs.spd = (0.020 + (gs.level-1)*0.007) * map.speedMod;
-                if (gs.spd > 0.10 * map.speedMod) gs.spd = 0.10 * map.speedMod;
-                gs.left = 7; gs.stuck = [];
-                wobbles.length = 0;
-                trySpawnApple();    // new level — chance for a fresh bonus apple
-              }
-              releaseQueuedThrow();   // fire any buffered tap/space press immediately
+        if (!appleConsumedThrow && dist <= LOG_R) {
+          const ig = Math.atan2(dy, dx);
+          const { hit, local } = checkHit(ig);
+          if (hit) {
+            gs.over = true; gs.phase = "dead"; gs.flying = null;
+            gs.impactPt = { angle: ig };
+            spawnChips(ig);                    // chips fly even on the fatal hit
+            triggerShake(7);                    // bigger shake — this one hurts
+            gs.flash = 10;
+            queuedThrow = false;                 // game's over, drop any buffered input
+            snd.fail(); onEnd(gs.score, gs.level);
+          } else {
+            gs.stuck.push(local); gs.flying = null; gs.phase = "idle";
+            wobbles[gs.stuck.length-1] = 1;     // new knife starts quivering
+            gs.impactPt = { angle: ig };
+            spawnChips(ig);
+            triggerShake(4);
+            gs.score++; gs.left--; gs.flash = 10; snd.hit();
+            if (gs.left <= 0) {
+              gs.level++; gs.spd = (0.020 + (gs.level-1)*0.007) * map.speedMod;
+              if (gs.spd > 0.10 * map.speedMod) gs.spd = 0.10 * map.speedMod;
+              gs.left = 7; gs.stuck = [];
+              wobbles.length = 0;
+              trySpawnApple();    // new level — chance for a fresh bonus apple
             }
+            releaseQueuedThrow();   // fire any buffered tap/space press immediately
           }
         }
         if (gs.flying && gs.flying.y < -60) { gs.flying = null; gs.phase = "idle"; releaseQueuedThrow(); }
@@ -818,7 +834,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
       ctx.save();
       ctx.translate(shake.x, shake.y);
 
-      drawBg(t); drawLog(); drawZones(); drawStuck(t);
+      drawBg(t); drawLog(); drawZones(); drawApple(t); drawStuck(t);
       updateAndDrawChips();
       if (gs.flying) knife.draw(ctx, gs.flying.x, gs.flying.y, 0, t, 1.18);
       drawLauncher(t); drawHUD();
@@ -867,6 +883,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     canvas.addEventListener("touchstart", e=>{ e.preventDefault(); doThrow(); }, { passive:false });
     const kd = e => { if(e.code==="Space"){e.preventDefault();doThrow();} };
     document.addEventListener("keydown", kd);
+    trySpawnApple();          // chance for a bonus apple right from level 1
     gs.raf = requestAnimationFrame(frame);
 
     return () => {
@@ -933,10 +950,15 @@ function Stat({ label, value, accent }) {
 // Phase 3 "result"  — spinning stops, result card fades in with a glow matching
 //                     the knife rarity. Player clicks Collect to close.
 // ─────────────────────────────────────────────────────────────────────────────
-function CaseModal({ crate, onResult, onClose }) {
+function CaseModal({ crate, onCharge, onResult, onClose }) {
   const [phase, setPhase]     = useState("ready");
   const [result, setResult]   = useState(null);
   const snd = useSound();
+
+  // ── Confetti burst (plays once, right when the result is revealed) ──
+  const confettiRef   = useRef(null);
+  const confettiRaf    = useRef(null);
+  const confettiPieces = useRef([]);
 
   // ── Reel data (built once, stable across renders) ──
   const ITEM_W  = 88;   // px per card
@@ -965,8 +987,16 @@ function CaseModal({ crate, onResult, onClose }) {
     targetIdx.current = winnerSlot;
   }
 
-  // ── Open button handler — sets phase, animation starts in useEffect ──
+  // ── Open button handler ──────────────────────────────────────────────
+  // This is the ONLY moment money actually changes hands: the player has
+  // already seen the drop-rate table and explicitly clicked "Open Case".
+  // If the charge fails (e.g. coins changed in another tab / insufficient
+  // funds), we do NOT start the spin — the player stays on the "ready"
+  // screen and can still hit Cancel with their coins untouched.
   function handleOpen() {
+    const charged = onCharge ? onCharge(crate) : true;
+    if (!charged) return;   // payment failed — never enters spinning phase
+
     posRef.current  = 0;
     velRef.current  = 9 + Math.random() * 4;   // initial scroll speed
     doneRef.current = false;
@@ -1059,15 +1089,16 @@ function CaseModal({ crate, onResult, onClose }) {
 
       // Friction: slow down as we approach target
       const remaining = TARGET - posRef.current;
-      if (remaining < ITEM_W * 3) {
-        // Ease in: decelerate more aggressively close to target
-        velRef.current = Math.max(0.4, velRef.current * 0.91);
+      if (remaining < ITEM_W * 1.8) {
+        // Ease in: decelerate close to target, but not so gradually that
+        // the last stretch crawls — keeps the finish feeling snappy.
+        velRef.current = Math.max(0.9, velRef.current * 0.88);
       }
 
       posRef.current += velRef.current;
 
       // Snap to target when close enough and slow enough
-      if (posRef.current >= TARGET && velRef.current < 1.5) {
+      if (posRef.current >= TARGET && velRef.current < 2.2) {
         posRef.current  = TARGET;
         doneRef.current = true;
         drawFrame(canvas, posRef.current);
@@ -1079,7 +1110,7 @@ function CaseModal({ crate, onResult, onClose }) {
           setPhase("result");
           const rich = ["epic","legendary","mythic"].includes(winner.rarity);
           if (rich) snd.rare(); else snd.coin();
-        }, 420);
+        }, 220);
         return;
       }
 
@@ -1091,14 +1122,109 @@ function CaseModal({ crate, onResult, onClose }) {
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [phase]);
 
+  // ── CONFETTI ────────────────────────────────────────────────────────────
+  // Fires once when the result is revealed. Pieces spawn from the top of the
+  // modal, tumble down with gravity + drag + rotation, and fade near the end
+  // of their life. Colors lean toward the won knife's rarity color plus gold,
+  // so rarer drops feel a touch more celebratory without a separate code path.
+  useEffect(() => {
+    if (phase !== "result" || !result) return;
+
+    const canvas = confettiRef.current;
+    if (!canvas) return;
+    const screenW = canvas.width;
+    const screenH = canvas.height;
+
+    const r = RARITIES[result.rarity];
+    const palette = [r.color, C.gold, "#FFFFFF", r.color, C.gold];
+    const big = ["epic","legendary","mythic"].includes(result.rarity);
+
+    // More pieces now that confetti spans the whole viewport, not just the card
+    const count = big ? 160 : 100;
+    confettiPieces.current = Array.from({ length: count }, () => ({
+      x: Math.random() * (screenW + 80) - 40,
+      y: -20 - Math.random() * (screenH * 0.4),   // staggered start heights for a fuller fall
+      vx: (Math.random() - 0.5) * 2.4,
+      vy: 2 + Math.random() * 3,
+      rot: Math.random() * Math.PI * 2,
+      vrot: (Math.random() - 0.5) * 0.32,
+      size: 5 + Math.random() * 5,
+      color: palette[Math.floor(Math.random() * palette.length)],
+      life: 1,
+      decay: 0.004 + Math.random() * 0.005,
+      shape: Math.random() < 0.5 ? "rect" : "circle",
+    }));
+
+    const startT = Date.now();
+
+    function loop() {
+      if (!canvas) { confettiRaf.current = requestAnimationFrame(loop); return; }
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      let aliveCount = 0;
+      for (const p of confettiPieces.current) {
+        if (p.life <= 0) continue;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.05;          // gentle gravity
+        p.vx *= 0.99;           // air drag
+        p.rot += p.vrot;
+        // Only start fading after falling a bit, so the burst reads clearly first
+        if (Date.now() - startT > 800) p.life -= p.decay;
+        if (p.y > canvas.height + 20 || p.life <= 0) { p.life = 0; continue; }
+        aliveCount++;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        if (p.shape === "rect") {
+          ctx.fillRect(-p.size/2, -p.size/3, p.size, p.size*0.66);
+        } else {
+          ctx.beginPath(); ctx.arc(0, 0, p.size/2, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      if (aliveCount > 0) {
+        confettiRaf.current = requestAnimationFrame(loop);
+      }
+    }
+    confettiRaf.current = requestAnimationFrame(loop);
+
+    return () => { if (confettiRaf.current) cancelAnimationFrame(confettiRaf.current); };
+  }, [phase, result]);
+
   const rr = result ? RARITIES[result.rarity] : null;
 
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.82)",
         display:"flex", alignItems:"center", justifyContent:"center", zIndex:500 }}>
+
+      {/* Confetti overlay — spans the ENTIRE screen, sits above the dark backdrop
+          but below the modal card, so confetti rains across the whole background
+          rather than being clipped inside the card. */}
+      {phase === "result" && (
+        <canvas
+          ref={confettiRef}
+          width={typeof window !== "undefined" ? window.innerWidth  : 800}
+          height={typeof window !== "undefined" ? window.innerHeight : 600}
+          style={{
+            position:"fixed", top:0, left:0,
+            width:"100vw", height:"100vh",
+            pointerEvents:"none", zIndex:501,
+          }}
+        />
+      )}
+
       <div style={{ background:C.panel, borderRadius:14, padding:"24px 20px",
           width: CANVAS_W + 40, maxWidth:"95vw",
-          border:`0.5px solid ${C.borderHi}`, textAlign:"center" }}>
+          border:`0.5px solid ${C.borderHi}`, textAlign:"center",
+          position:"relative", zIndex:502 }}>
+
+        <div style={{ position:"relative", zIndex:1 }}>
 
         {/* Header */}
         <div style={{ fontWeight:700, fontSize:15, color:C.gold, marginBottom:2,
@@ -1176,6 +1302,7 @@ function CaseModal({ crate, onResult, onClose }) {
             </button>
           </div>
         )}
+        </div>
       </div>
       <style>{`@keyframes fadeIn { from { opacity:0; transform:scale(0.92); } to { opacity:1; transform:scale(1); } }`}</style>
     </div>
@@ -1252,7 +1379,9 @@ export default function App() {
 
   // ── Game end ──
   function onGameEnd(score) {
-    const coins = score * 5;
+    const playedMap = MAPS.find(m => m.id === save.activeMap) || MAPS[0];
+    const rate = playedMap.coinRate ?? 5;   // Practice Yard pays 1🪙/hit, other maps default to 5🪙/hit
+    const coins = score * rate;
     upd(p => {
       p.stats.score = Math.max(p.stats.score, score);
       p.stats.games++;
@@ -1262,6 +1391,12 @@ export default function App() {
     });
     toast$(`Game over · +${coins} 🪙`, true);
     setGameKey(k => k + 1); // remount after short delay
+  }
+
+  // ── Bonus apple hit mid-game — instant coin reward, doesn't wait for game end ──
+  function onAppleCoins(amount) {
+    upd(p => { p.coins += amount; return p; });
+    toast$(`🍎 Apple bonus! +${amount} 🪙`, true);
   }
 
   // ── Daily reward ──
@@ -1281,15 +1416,25 @@ export default function App() {
   }
 
   // ── Case opening ──
+  // NOTE: coins are deducted inside the modal's own confirm step (handleOpen),
+  // NOT here. This screen's "Open" button just opens the confirmation modal —
+  // charging here would mean Cancel-ing the modal's own "Open Case" button
+  // could never refund the player, since the money was already gone.
   function buyCase(crate) {
     if (save.coins < crate.price) { toast$("Not enough coins"); return; }
-    upd(p => { p.coins -= crate.price; return p; });
     setOpenCase(crate);
   }
   function onCaseResult(knife) {
     upd(p => { p.inventory.push(knife.id); return p; });
     setOpenCase(null);
     toast$(`${knife.name} added to inventory!`, true);
+  }
+  // Called by the modal right when the player confirms "Open Case" inside it —
+  // this is the actual moment of payment.
+  function chargeForCase(crate) {
+    if (save.coins < crate.price) { toast$("Not enough coins"); return false; }
+    upd(p => { p.coins -= crate.price; return p; });
+    return true;
   }
 
   // ── Equip ──
@@ -1340,7 +1485,7 @@ export default function App() {
 
       {/* ── GLOBAL MODALS ── */}
       {inspecting && <InspectModal knife={inspecting} onClose={()=>setInspecting(null)} />}
-      {openCase   && <CaseModal crate={openCase} onResult={onCaseResult} onClose={()=>setOpenCase(null)} />}
+      {openCase   && <CaseModal crate={openCase} onCharge={chargeForCase} onResult={onCaseResult} onClose={()=>setOpenCase(null)} />}
 
       {/* ── TOAST ── */}
       {toast && (
@@ -1425,7 +1570,7 @@ export default function App() {
             {/* Quick actions */}
             <SectionHead>QUICK ACTIONS</SectionHead>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:16 }}>
-              <ActionCard icon="▶" label="Throw knives" sub="Earn 5🪙 per hit"
+              <ActionCard icon="▶" label="Throw knives" sub={`Earn ${activeMap.coinRate ?? 5}🪙 per hit`}
                 onClick={()=>setScreen("play")} accent={C.gold} />
               <ActionCard icon={activeMap.icon} label={activeMap.name} sub="Tap to change arena"
                 onClick={()=>setScreen("maps")} accent="#CC4488" />
@@ -1479,9 +1624,9 @@ export default function App() {
                 &nbsp;·&nbsp;×{activeMap.speedMod.toFixed(2)} speed
               </div>
             </div>
-            <GameCanvas equippedId={save.equipped} mapId={save.activeMap} onEnd={onGameEnd} key={gameKey + save.activeMap} />
+            <GameCanvas equippedId={save.equipped} mapId={save.activeMap} onEnd={onGameEnd} onCoins={onAppleCoins} key={gameKey + save.activeMap} />
             <div style={{ fontSize:10, color:C.textDim, fontFamily:"monospace" }}>
-              CLICK · SPACE · TAP to throw &nbsp;·&nbsp; 5 🪙 PER HIT
+              CLICK · SPACE · TAP to throw &nbsp;·&nbsp; {activeMap.coinRate ?? 5} 🪙 PER HIT
             </div>
             <div style={{ display:"flex", gap:8 }}>
               <button onClick={()=>setGameKey(k=>k+1)} style={BtnStyle()}>New Game</button>
@@ -1522,6 +1667,9 @@ export default function App() {
                       <div style={{ display:"flex", gap:14 }}>
                         <span style={{ fontSize:10, color:C.textMid, fontFamily:"monospace" }}>
                           SPEED ×{m.speedMod.toFixed(2)}
+                        </span>
+                        <span style={{ fontSize:10, color:"#E8C878", fontFamily:"monospace" }}>
+                          {m.coinRate ?? 5} 🪙/HIT
                         </span>
                         {locked && (
                           <span style={{ fontSize:10, color:"#D08888", fontFamily:"monospace" }}>
