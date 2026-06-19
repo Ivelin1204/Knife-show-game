@@ -167,14 +167,111 @@ const MAPS = [
       const g=ctx.createLinearGradient(0,0,0,H);
       g.addColorStop(0,"#05030C"); g.addColorStop(0.6,"#0A0518"); g.addColorStop(1,"#150A28");
       ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+      // Slow background plane crossing the skyline
+      const planeCycle = W + 520;
+      const planePhase = (t*0.045) % planeCycle;
+      if (planePhase < W + 90) {
+        const planePass = Math.floor((t*0.045) / planeCycle);
+        const planeDir = planePass % 2 === 0 ? -1 : 1;
+        const planeX = planeDir === -1 ? W + 45 - planePhase : planePhase - 45;
+        const planeY = 62 + Math.sin(t*0.0015)*5;
+        ctx.save();
+        ctx.translate(planeX, planeY);
+        ctx.scale(planeDir, 1);
+        ctx.scale(0.72, 0.72);
+
+      // Faint neon contrail
+      const trail = ctx.createLinearGradient(-52,0,-16,0);
+      trail.addColorStop(0,"rgba(45,90,120,0)");
+      trail.addColorStop(1,"rgba(45,90,120,0.14)");
+      ctx.strokeStyle = trail;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-54,1);
+      ctx.bezierCurveTo(-42,-2,-31,-2,-20,0);
+      ctx.stroke();
+
+      // Main fuselage
+      ctx.fillStyle = "rgba(42,55,78,0.82)";
+      ctx.strokeStyle = "rgba(85,120,150,0.34)";
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(24,0);
+      ctx.bezierCurveTo(14,-5,-8,-6,-26,-4);
+      ctx.lineTo(-34,-10);
+      ctx.lineTo(-29,-3);
+      ctx.bezierCurveTo(-35,-2,-39,0,-40,2);
+      ctx.bezierCurveTo(-22,5,9,5,24,0);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // Wings
+      ctx.fillStyle = "rgba(34,45,68,0.82)";
+      ctx.beginPath();
+      ctx.moveTo(-4,-2);
+      ctx.lineTo(-23,-17);
+      ctx.lineTo(-10,-2);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-2,3);
+      ctx.lineTo(-24,17);
+      ctx.lineTo(-9,3);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // Realistic dim wingtip navigation lights for night readability
+      const navBlink = Math.abs(Math.sin(t*0.018));
+      const strobe = Math.pow(Math.abs(Math.sin(t*0.045)), 8);
+      ctx.fillStyle = `rgba(220,45,70,${0.16+navBlink*0.64})`;
+      ctx.beginPath(); ctx.arc(-23,-17,1.7,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = `rgba(55,220,135,${0.14+navBlink*0.62})`;
+      ctx.beginPath(); ctx.arc(-24,17,1.7,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = `rgba(230,245,255,${0.12+strobe*0.88})`;
+      ctx.beginPath(); ctx.arc(-6,0,1.5,0,Math.PI*2); ctx.fill();
+
+      // Tail fin and rear wing
+      ctx.fillStyle = "rgba(58,42,82,0.72)";
+      ctx.beginPath();
+      ctx.moveTo(-30,-4);
+      ctx.lineTo(-42,-15);
+      ctx.lineTo(-36,-3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-31,3);
+      ctx.lineTo(-43,10);
+      ctx.lineTo(-36,2);
+      ctx.closePath();
+      ctx.fill();
+
+      // Cockpit and blinking nav light
+      ctx.fillStyle = "rgba(110,150,180,0.34)";
+      ctx.beginPath();
+      ctx.ellipse(10,-2,4,1.5,-0.1,0,Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = `rgba(170,45,80,${0.18+0.18*Math.abs(Math.sin(t*0.01))})`;
+      ctx.beginPath();
+      ctx.arc(-38,0,1.8,0,Math.PI*2);
+      ctx.fill();
+        ctx.restore();
+      }
+
       // Distant skyline silhouettes
-      const buildings=[[0,60,0.5],[40,90,0.7],[85,70,0.4],[130,110,0.6],[175,80,0.5],[220,100,0.65],[265,65,0.45]];
-      buildings.forEach(([bx,bh,op])=>{
+      const buildings=[
+        [-18,85,34,0.42],[14,120,38,0.62],[54,148,50,0.74],[101,102,34,0.48],
+        [128,136,44,0.64],[169,96,30,0.5],[195,156,48,0.7],[240,118,36,0.58],
+        [270,142,42,0.67],[309,92,34,0.46],[336,130,46,0.6]
+      ];
+      buildings.forEach(([bx,bh,bw,op])=>{
         ctx.fillStyle=`rgba(20,12,40,${op})`;
-        ctx.fillRect(bx,H-160-bh,40,bh+110);
+        ctx.fillRect(bx,H-160-bh,bw,bh+110);
+        ctx.fillStyle=`rgba(8,5,22,${Math.min(0.78,op+0.15)})`;
+        ctx.fillRect(bx+3,H-158-bh,bw-6,4);
         // lit windows
         for(let wy=H-150-bh;wy<H-60;wy+=11){
-          for(let wx=bx+4;wx<bx+36;wx+=9){
+          for(let wx=bx+5;wx<bx+bw-5;wx+=9){
             if(Math.sin(wx*3+wy*1.7+bx)>0.6){
               ctx.fillStyle=`rgba(255,200,80,${0.5+0.3*Math.sin(t*0.003+wx)})`;
               ctx.fillRect(wx,wy,4,5);
@@ -193,6 +290,7 @@ const MAPS = [
       ctx.strokeStyle=`rgba(60,220,255,${rimPulse*0.8})`; ctx.lineWidth=1;
       ctx.beginPath(); ctx.moveTo(0,H-48); ctx.lineTo(W,H-48); ctx.stroke();
       // Neon side signs
+      /*
       for(let [sx,col,label] of [[20,"#FF2890","蜉"],[W-32,"#3CDCFF","乙"]]){
         const p=0.5+0.4*Math.sin(t*0.005+sx);
         ctx.strokeStyle=`rgba(${col==="#FF2890"?"255,40,144":"60,220,255"},${p})`;
@@ -200,6 +298,7 @@ const MAPS = [
         ctx.fillStyle=col; ctx.globalAlpha=p; ctx.font="bold 12px sans-serif"; ctx.textAlign="center";
         ctx.fillText(label,sx+8,H-175); ctx.globalAlpha=1;
       }
+      */
       // Drifting particles (city dust / sparks)
       for(let i=0;i<10;i++){
         const px=(i*53+t*0.02)%W, py=((i*97)%(H-60));
@@ -220,33 +319,202 @@ const MAPS = [
       const g=ctx.createLinearGradient(0,0,0,H);
       g.addColorStop(0,"#1A0805"); g.addColorStop(0.5,"#2A0E08"); g.addColorStop(1,"#180400");
       ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-      // Distant volcano silhouette glowing at the peak
-      ctx.fillStyle="#0E0402";
-      ctx.beginPath(); ctx.moveTo(CX-90,H-180); ctx.lineTo(CX-10,H-280); ctx.lineTo(CX+10,H-280); ctx.lineTo(CX+90,H-180); ctx.closePath(); ctx.fill();
+      // Distant volcano, swelling with pressure before an eruption
       const lavaGlow=0.5+0.4*Math.sin(t*0.004);
-      ctx.fillStyle=`rgba(255,110,30,${lavaGlow})`;
-      ctx.beginPath(); ctx.ellipse(CX,H-280,10,5,0,0,Math.PI*2); ctx.fill();
-      // Rock floor with cracks
-      ctx.fillStyle="#1C0C08"; ctx.fillRect(0,H-50,W,50);
-      ctx.strokeStyle="#341208"; ctx.lineWidth=1;
-      for(let x=0;x<W;x+=27){ctx.beginPath();ctx.moveTo(x,H-50);ctx.lineTo(x+6,H);ctx.stroke();}
-      // Glowing lava cracks running through floor
-      for(let i=0;i<3;i++){
-        const lx=40+i*(W-80)/2, p=0.4+0.4*Math.sin(t*0.005+i*2);
-        ctx.strokeStyle=`rgba(255,${100+i*20},30,${p})`; ctx.lineWidth=2;
-        ctx.beginPath(); ctx.moveTo(lx,H-50); ctx.lineTo(lx+10,H-25); ctx.lineTo(lx-6,H); ctx.stroke();
+      const pulse=0.55+0.45*Math.abs(Math.sin(t*0.0035));
+      [[94,1.18],[W-94,1]].forEach(([VX,VS], vi)=>{
+      const vg=ctx.createRadialGradient(VX,H-88,0,VX,H-88,142*VS);
+      vg.addColorStop(0,`rgba(255,85,25,${0.16*pulse})`);
+      vg.addColorStop(0.42,`rgba(120,30,10,${0.11*pulse})`);
+      vg.addColorStop(1,"rgba(80,10,4,0)");
+      ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+
+      // smoke plume behind the log
+      for(let i=0;i<7;i++){
+        const sx=VX+(-36+i*12)*VS+Math.sin(t*0.001+i+vi)*10*VS;
+        const sy=H-137*VS-i*12*VS-((t*0.012+i*9)%24);
+        const sr=(16+i*2)*VS;
+        ctx.fillStyle=`rgba(70,48,42,${0.10+0.035*Math.sin(t*0.002+i)})`;
+        ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
       }
+
+      // main mountain body
+      ctx.fillStyle="#0B0302";
+      ctx.beginPath();
+      ctx.moveTo(VX-124*VS,H-46*VS);
+      ctx.lineTo(VX-58*VS,H-126*VS);
+      ctx.lineTo(VX-27*VS,H-157*VS);
+      ctx.lineTo(VX-11*VS,H-146*VS);
+      ctx.lineTo(VX+11*VS,H-146*VS);
+      ctx.lineTo(VX+27*VS,H-157*VS);
+      ctx.lineTo(VX+58*VS,H-126*VS);
+      ctx.lineTo(VX+124*VS,H-46*VS);
+      ctx.closePath();
+      ctx.fill();
+
+      // darker ridges
+      ctx.strokeStyle="rgba(60,18,10,0.7)"; ctx.lineWidth=2;
+      [[-86,-58,-29,-146],[-45,-57,-8,-143],[45,-57,13,-143],[90,-58,31,-132]].forEach(([x1,y1,x2,y2])=>{
+        ctx.beginPath(); ctx.moveTo(VX+x1*VS,H+y1*VS); ctx.lineTo(VX+x2*VS,H+y2*VS); ctx.stroke();
+      });
+
+      // glowing crater and lava seams
+      const crater=ctx.createRadialGradient(VX,H-150*VS,0,VX,H-150*VS,40*VS);
+      crater.addColorStop(0,`rgba(255,210,80,${0.75*pulse})`);
+      crater.addColorStop(0.35,`rgba(255,90,20,${0.55*pulse})`);
+      crater.addColorStop(1,"rgba(255,90,20,0)");
+      ctx.fillStyle=crater; ctx.fillRect(VX-60*VS,H-193*VS,120*VS,76*VS);
+      ctx.fillStyle=`rgba(255,115,28,${0.75*pulse})`;
+      ctx.beginPath(); ctx.ellipse(VX,H-150*VS,22*VS,7*VS,0,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle=`rgba(255,95,25,${0.55*pulse})`; ctx.lineWidth=2;
+      [[-8,-145,-22,-105,-16,-70],[11,-146,27,-113,22,-80],[-1,-145,3,-112,-5,-92]].forEach(path=>{
+        ctx.beginPath(); ctx.moveTo(VX+path[0]*VS,H+path[1]*VS);
+        ctx.lineTo(VX+path[2]*VS,H+path[3]*VS); ctx.lineTo(VX+path[4]*VS,H+path[5]*VS); ctx.stroke();
+      });
+
+      // pressure sparks above the crater
+      for(let i=0;i<10;i++){
+        const a=i*0.9+t*0.004+vi*0.6;
+        const sx=VX+Math.cos(a)*(8+i*3)*VS;
+        const sy=H-154*VS-Math.abs(Math.sin(a*1.4))*26*VS-i*2.8*VS;
+        ctx.fillStyle=`rgba(255,150,55,${0.25+0.35*pulse})`;
+        ctx.beginPath(); ctx.arc(sx,sy,1.2,0,Math.PI*2); ctx.fill();
+      }
+      });
+      // Uneven stepping-stone path floor
+      const floorTop = H - 74;
+      const fg=ctx.createLinearGradient(0,floorTop,0,H);
+      fg.addColorStop(0,"#070302"); fg.addColorStop(0.45,"#070302"); fg.addColorStop(1,"#030101");
+      ctx.fillStyle=fg; ctx.fillRect(0,floorTop,W,H-floorTop);
+      ctx.fillStyle="rgba(0,0,0,0.42)";
+      ctx.fillRect(0,floorTop,W,5);
+      const upperRoadLight=ctx.createLinearGradient(0,floorTop,0,floorTop+28);
+      upperRoadLight.addColorStop(0,"rgba(95,34,18,0.22)");
+      upperRoadLight.addColorStop(1,"rgba(95,34,18,0)");
+      ctx.fillStyle=upperRoadLight; ctx.fillRect(0,floorTop,W,30);
+      const roadShadow=ctx.createLinearGradient(0,floorTop+18,0,H);
+      roadShadow.addColorStop(0,"rgba(0,0,0,0)");
+      roadShadow.addColorStop(1,"rgba(0,0,0,0.52)");
+      ctx.fillStyle=roadShadow; ctx.fillRect(0,floorTop,W,H-floorTop);
+
+      const stones=[
+        [-180,18,44,24,-0.08],[-112,30,58,26,0.04],[-42,16,48,28,-0.03],
+        [-156,24,20,14,-0.05],[-73,24,24,16,0.05],[-8,24,20,15,-0.06],[76,25,22,15,0.07],[154,26,24,15,-0.05],[222,31,20,14,0.05],
+        [30,35,66,26,0.06],[-2,44,18,13,0.03],[111,18,52,30,-0.04],[184,33,64,24,0.03],
+        [-150,61,74,30,0.05],[-100,59,20,15,0.05],[-58,57,56,32,-0.06],[-15,59,26,18,0.04],[32,65,68,28,0.02],[83,62,24,17,-0.05],[174,61,22,16,0.06],[259,67,18,13,-0.04],
+        [123,57,76,31,-0.04],[218,64,68,26,-0.03]
+      ];
+      stones.forEach(([ox,oy,sw,sh,rot],i)=>{
+        const scale=1+oy/95;
+        const sx=CX+ox*scale;
+        const sy=floorTop+oy;
+        const w=sw*scale*0.86;
+        const h=sh*scale*0.86;
+        ctx.save();
+        ctx.translate(sx,sy);
+        ctx.rotate(rot);
+        const sg=ctx.createLinearGradient(0,-h/2,0,h/2);
+        sg.addColorStop(0,"#5A554C");
+        sg.addColorStop(0.45,"#3E3A34");
+        sg.addColorStop(1,"#23201D");
+        ctx.fillStyle=sg;
+        ctx.beginPath();
+        if (i % 5 === 1) {
+          ctx.ellipse(0,0,w*0.48,h*0.46,0.08,0,Math.PI*2);
+        } else if (i % 5 === 3) {
+          ctx.moveTo(-w*0.34,-h*0.52);
+          ctx.quadraticCurveTo(w*0.08,-h*0.64,w*0.46,-h*0.22);
+          ctx.quadraticCurveTo(w*0.58,h*0.18,w*0.20,h*0.54);
+          ctx.quadraticCurveTo(-w*0.28,h*0.58,-w*0.52,h*0.10);
+          ctx.quadraticCurveTo(-w*0.58,-h*0.24,-w*0.34,-h*0.52);
+        } else {
+          ctx.moveTo(-w*0.45,-h*0.45);
+          ctx.quadraticCurveTo(-w*0.08,-h*0.58,w*0.42,-h*0.38);
+          ctx.quadraticCurveTo(w*0.55,-h*0.02,w*0.38,h*0.42);
+          ctx.quadraticCurveTo(-w*0.02,h*0.56,-w*0.46,h*0.34);
+          ctx.quadraticCurveTo(-w*0.56,-h*0.02,-w*0.45,-h*0.45);
+        }
+        ctx.fill();
+        ctx.strokeStyle="rgba(10,8,7,0.85)";
+        ctx.lineWidth=1;
+        ctx.stroke();
+
+        // chipped rock cracks like dark slate
+        ctx.strokeStyle="rgba(7,6,5,0.62)";
+        ctx.lineWidth=0.9;
+        ctx.beginPath();
+        ctx.moveTo(-w*0.20,-h*0.42);
+        ctx.quadraticCurveTo(-w*0.05,-h*0.14,-w*0.12,h*0.10);
+        ctx.lineTo(w*0.12,h*0.38);
+        ctx.stroke();
+        if (i % 2 === 0) {
+          ctx.beginPath();
+          ctx.moveTo(-w*0.42,h*0.10);
+          ctx.quadraticCurveTo(-w*0.10,h*0.04,w*0.16,h*0.02);
+          ctx.stroke();
+        }
+
+        // tiny mineral speckles
+        ctx.fillStyle="rgba(180,170,150,0.18)";
+        for(let s=0;s<5;s++){
+          const px=-w*0.35+((s*17+i*9)%(w*0.7));
+          const py=-h*0.30+((s*11+i*5)%(h*0.6));
+          ctx.fillRect(px,py,1,1);
+        }
+        ctx.restore();
+      });
+
       // Two forge braziers flanking, with flickering flame
       for(let bx of [22,W-30]){
-        ctx.fillStyle="#241008"; ctx.beginPath(); ctx.roundRect(bx,H-90,16,40,2); ctx.fill();
+        const cx=bx+8;
         const fl=Math.sin(t*0.012+bx)*3;
-        ctx.fillStyle=`rgba(255,${140+Math.sin(t*0.01)*40},40,0.9)`;
-        ctx.beginPath();
-        ctx.moveTo(bx+2,H-90); ctx.quadraticCurveTo(bx+8+fl,H-115,bx+8,H-130);
-        ctx.quadraticCurveTo(bx+8-fl,H-115,bx+14,H-90); ctx.closePath(); ctx.fill();
-        const glow=ctx.createRadialGradient(bx+8,H-105,0,bx+8,H-105,50);
-        glow.addColorStop(0,"rgba(255,140,40,0.2)"); glow.addColorStop(1,"transparent");
+        const flamePulse=0.65+0.35*Math.abs(Math.sin(t*0.01+bx));
+
+        const glow=ctx.createRadialGradient(cx,H-108,0,cx,H-108,64);
+        glow.addColorStop(0,`rgba(255,140,45,${0.24*flamePulse})`);
+        glow.addColorStop(0.45,`rgba(255,75,20,${0.10*flamePulse})`);
+        glow.addColorStop(1,"transparent");
         ctx.fillStyle=glow; ctx.fillRect(0,0,W,H);
+
+        // iron post and cup
+        ctx.fillStyle="#130806"; ctx.beginPath(); ctx.roundRect(bx+3,H-89,10,42,2); ctx.fill();
+        ctx.fillStyle="#2B1710"; ctx.beginPath(); ctx.roundRect(bx-2,H-92,20,8,2); ctx.fill();
+        ctx.fillStyle="#070303"; ctx.beginPath(); ctx.ellipse(cx,H-88,11,4,0,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle="rgba(120,70,45,0.55)"; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(bx-2,H-88); ctx.lineTo(bx+18,H-88); ctx.stroke();
+
+        // smoke wisps
+        ctx.strokeStyle="rgba(70,52,48,0.18)"; ctx.lineWidth=1;
+        for(let s=0;s<2;s++){
+          ctx.beginPath();
+          ctx.moveTo(cx+s*3-2,H-123);
+          ctx.bezierCurveTo(cx-8+s*5,H-134,cx+9-s*4,H-143,cx+s*2,H-153);
+          ctx.stroke();
+        }
+
+        // outer flame
+        ctx.fillStyle=`rgba(255,90,30,${0.82+0.12*flamePulse})`;
+        ctx.beginPath();
+        ctx.moveTo(cx-9,H-88);
+        ctx.bezierCurveTo(cx-13,H-104,cx+fl-4,H-115,cx,H-133);
+        ctx.bezierCurveTo(cx+10+fl,H-116,cx+13,H-101,cx+9,H-88);
+        ctx.closePath(); ctx.fill();
+
+        // inner flame
+        ctx.fillStyle=`rgba(255,205,80,${0.86})`;
+        ctx.beginPath();
+        ctx.moveTo(cx-5,H-88);
+        ctx.bezierCurveTo(cx-7,H-101,cx+fl*0.5,H-110,cx+1,H-123);
+        ctx.bezierCurveTo(cx+6,H-110,cx+7,H-99,cx+4,H-88);
+        ctx.closePath(); ctx.fill();
+
+        // hot core
+        ctx.fillStyle="rgba(255,245,170,0.75)";
+        ctx.beginPath();
+        ctx.moveTo(cx-2,H-89);
+        ctx.quadraticCurveTo(cx+2,H-104,cx,H-113);
+        ctx.quadraticCurveTo(cx+4,H-101,cx+2,H-89);
+        ctx.closePath(); ctx.fill();
       }
       // Drifting embers rising
       for(let i=0;i<14;i++){
@@ -432,6 +700,7 @@ const DEFAULT_SAVE = {
 // ─── SOUND ENGINE ─────────────────────────────────────────────────────────────
 // Module-scoped mute flag — plain object so canvas effects read it without remounting.
 const SOUND_MUTED = { current: false };
+const WORLD_CLOCK_START = Date.now();
 
 function useSound() {
   const acRef = useRef(null);
@@ -506,7 +775,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     const APPLE_HIT_RADIUS = 24;                  // generous pixel hit-radius around the apple (bigger = easier to hit)
     const knife = KNIVES.find(k => k.id === equippedId) || KNIVES[0];
     const map   = MAPS.find(m => m.id === mapId) || MAPS[0];
-    const t0 = Date.now();
+    const t0 = WORLD_CLOCK_START;
 
     s.current = {
       ang: 0, spd: 0.020 * map.speedMod, score: 0, level: 1,
