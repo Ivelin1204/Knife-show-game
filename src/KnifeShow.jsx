@@ -295,14 +295,75 @@ const MAPS = [
       ctx.fillStyle=`rgba(232,200,120,${floorShine})`; ctx.fillRect(0,H-52,W,2);
       ctx.strokeStyle="rgba(150,110,40,0.5)"; ctx.lineWidth=0.8;
       for(let x=0;x<W;x+=24){ctx.beginPath();ctx.moveTo(x,H-50);ctx.lineTo(x,H);ctx.stroke();}
-      // Floating gold rings around the arena, slowly orbiting
-      for(let i=0;i<2;i++){
-        const orbA=t*0.0006+i*Math.PI;
-        const ox=CX+Math.cos(orbA)*120, oy=H-160+Math.sin(orbA)*18;
-        ctx.strokeStyle=`rgba(232,200,120,${0.35+0.25*Math.sin(t*0.004+i)})`;
-        ctx.lineWidth=1.5;
-        ctx.beginPath(); ctx.ellipse(ox,oy,14,5,0,0,Math.PI*2); ctx.stroke();
+      // ── FLYING UFOs ──────────────────────────────────────────────────────
+      // Two saucers drift across the starfield on independent slow sweeping
+      // paths (not a tight fixed orbit), each with: a metallic saucer body,
+      // a glowing dome on top, blinking rim lights that cycle around the
+      // edge, and a faint beam of light shining down — classic "real UFO"
+      // silhouette instead of a bare ring.
+      function drawUFO(ux, uy, scale, seed) {
+        ctx.save();
+        ctx.translate(ux, uy);
+        ctx.scale(scale, scale);
+
+        // Soft ambient glow behind the whole craft
+        const haloPulse = 0.25 + 0.15*Math.sin(t*0.004 + seed);
+        const halo = ctx.createRadialGradient(0,0,0,0,0,34);
+        halo.addColorStop(0, `rgba(180,220,255,${haloPulse})`);
+        halo.addColorStop(1, "transparent");
+        ctx.fillStyle = halo;
+        ctx.beginPath(); ctx.arc(0,0,34,0,Math.PI*2); ctx.fill();
+
+        // Downward beam — flickers gently, like a tractor-beam scan
+        const beamFlicker = 0.10 + 0.08*Math.abs(Math.sin(t*0.006 + seed*2));
+        const beam = ctx.createLinearGradient(0,4,0,46);
+        beam.addColorStop(0, `rgba(200,255,230,${beamFlicker})`);
+        beam.addColorStop(1, "rgba(200,255,230,0)");
+        ctx.fillStyle = beam;
+        ctx.beginPath();
+        ctx.moveTo(-3,4); ctx.lineTo(3,4); ctx.lineTo(14,46); ctx.lineTo(-14,46);
+        ctx.closePath(); ctx.fill();
+
+        // Saucer body — wide flattened ellipse, metallic shading
+        ctx.fillStyle = "#9AA8B8";
+        ctx.beginPath(); ctx.ellipse(0,2,18,6,0,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#C2CCDA";
+        ctx.beginPath(); ctx.ellipse(0,0,18,6,0,0,Math.PI*2); ctx.fill();
+        // Underside shadow rim
+        ctx.fillStyle = "rgba(40,46,56,0.5)";
+        ctx.beginPath(); ctx.ellipse(0,3,16,4,0,0,Math.PI); ctx.fill();
+
+        // Glowing dome on top
+        const domePulse = 0.6 + 0.4*Math.sin(t*0.005 + seed*1.3);
+        ctx.fillStyle = `rgba(140,230,210,${domePulse})`;
+        ctx.beginPath(); ctx.ellipse(0,-3,7,6,0,Math.PI,0); ctx.fill();
+        ctx.strokeStyle = "rgba(220,255,250,0.8)"; ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.ellipse(0,-3,7,6,0,Math.PI,0); ctx.stroke();
+
+        // Blinking rim lights — cycle around the saucer's edge
+        const lightCount = 5;
+        for (let li=0; li<lightCount; li++) {
+          const la = (li/lightCount)*Math.PI*2;
+          const lx = Math.cos(la)*16, ly = Math.sin(la)*5 + 1;
+          const blink = 0.3 + 0.7*Math.max(0, Math.sin(t*0.008 + li*1.3 + seed));
+          ctx.fillStyle = `rgba(255,210,90,${blink})`;
+          ctx.beginPath(); ctx.arc(lx, ly, 1.4, 0, Math.PI*2); ctx.fill();
+        }
+
+        ctx.restore();
       }
+
+      for (let i=0; i<2; i++) {
+        // Wide slow sweep: each UFO drifts left-right across the upper sky
+        // on its own sine path, rather than sitting in a tight fixed circle.
+        const speed = 0.00018 + i*0.00006;
+        const phase = t*speed + i*Math.PI;
+        const sweepX = CX + Math.sin(phase) * (W*0.42);
+        const bobY   = (H*0.16 + i*26) + Math.sin(t*0.0012 + i*2) * 10;
+        const scale  = 0.85 + i*0.25;
+        drawUFO(sweepX, bobY, scale, i*3.7);
+      }
+
       // Twin golden pillars with crystal tops
       for(let px of [10,W-22]){
         ctx.fillStyle="#3A2A10"; ctx.fillRect(px,H-240,14,240);
@@ -452,6 +513,11 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
       left: 7, stuck: [], over: false,
       phase: "idle", flying: null, flash: 0,
       particles: [],      // wood-chip burst on impact
+      breakPieces: [],    // larger chunks when a level log breaks apart
+      fallingKnives: [],  // knives knocked loose when the log breaks
+      breaking: 0,        // frames elapsed in the level-clear break animation
+      breakFlash: 0,      // bright flash while the wood splits
+      breakFallDir: 1,    // direction the broken log tips as it falls
       shakeT: 0,           // remaining screen-shake frames
       shakeMag: 0,          // current shake magnitude (decays)
       impactPt: null,        // {x,y,angle} world-space point of last impact, for flash + chip spawn
@@ -471,6 +537,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     // does NOT stick a knife in the log — the throw is "absorbed" by the
     // apple instead, so it never blocks future throws.
     function trySpawnApple() {
+      if (gs.phase === "breaking") return;
       if (gs.apple) return;               // only one apple at a time
       if (Math.random() > 0.35) return;     // not every level gets one
       // Find an angle not too close to any existing stuck knife
@@ -494,8 +561,24 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
       return { hit: false, local };
     }
 
+    function getFallingLogTransform() {
+      if (gs.phase !== "breaking" && gs.breaking <= 0) {
+        return { x: CX, y: LOG_CY, rot: 0, p: 0 };
+      }
+      const p = Math.min(1, gs.breaking / 58);
+      const ease = 1 - Math.pow(1 - p, 3);
+      return {
+        x: CX + gs.breakFallDir * 28 * ease,
+        y: LOG_CY + 155 * ease * ease,
+        rot: gs.breakFallDir * 1.25 * ease,
+        p,
+      };
+    }
+
     function drawLog() {
-      ctx.save(); ctx.translate(CX, LOG_CY); ctx.rotate(gs.ang);
+      if (gs.phase === "breaking") return;
+      const fall = getFallingLogTransform();
+      ctx.save(); ctx.translate(fall.x, fall.y); ctx.rotate(gs.ang + fall.rot);
       ctx.beginPath(); ctx.arc(0,0,LOG_R,0,Math.PI*2); ctx.fillStyle="#4A2E14"; ctx.fill();
       ctx.beginPath(); ctx.arc(0,0,LOG_R-4,0,Math.PI*2); ctx.fillStyle="#7A4E2A"; ctx.fill();
       ["#8A5E38","#6A421E","#956434","#5C3818","#9E6C42"].forEach((c,i)=>{
@@ -511,8 +594,8 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
       // with the log) so it reads as a strike, not a generic pulsing ring.
       if (gs.flash > 0 && gs.impactPt) {
         const p = gs.flash / 10;          // 1 -> 0 over ~10 frames
-        const ix = CX + Math.cos(gs.impactPt.angle) * LOG_R;
-        const iy = LOG_CY + Math.sin(gs.impactPt.angle) * LOG_R;
+        const ix = fall.x + Math.cos(gs.impactPt.angle + fall.rot) * LOG_R;
+        const iy = fall.y + Math.sin(gs.impactPt.angle + fall.rot) * LOG_R;
 
         // Bright core flash at impact point
         const core = ctx.createRadialGradient(ix, iy, 0, ix, iy, 16 + 10*(1-p));
@@ -541,6 +624,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     }
 
     function drawStuck(t) {
+      if (gs.phase === "breaking") return;
       // Each stuck knife is drawn so a visible SEGMENT OF BLADE plus the
       // HANDLE sticks out of the log — matching the reference look (knives
       // embedded a good distance in, with steel + handle showing, not just
@@ -558,13 +642,14 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
                                       // blade) is hidden; only what crosses the bark
                                       // line (a sliver of blade + the handle) shows.
 
+      const fall = getFallingLogTransform();
       for (let i=0; i<gs.stuck.length; i++) {
         const local = gs.stuck[i];
-        const w   = local + gs.ang;
+        const w   = local + gs.ang + fall.rot;
 
         // Anchor point sunk INTO the log, past the surface
-        const tx  = CX + Math.cos(w) * (LOG_R + EMBED_DEPTH);
-        const ty  = LOG_CY + Math.sin(w) * (LOG_R + EMBED_DEPTH);
+        const tx  = fall.x + Math.cos(w) * (LOG_R + EMBED_DEPTH);
+        const ty  = fall.y + Math.sin(w) * (LOG_R + EMBED_DEPTH);
 
         // Settle wobble: freshly-stuck knife quivers around its final angle
         // for a few frames, like a real blade absorbing impact energy.
@@ -578,7 +663,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
         // then the log's own bark (drawn after, at LOG_R) covers the rest.
         ctx.beginPath();
         ctx.rect(0, 0, W, H);
-        ctx.arc(CX, LOG_CY, VISIBLE_RADIUS, 0, Math.PI*2);
+        ctx.arc(fall.x, fall.y, VISIBLE_RADIUS, 0, Math.PI*2);
         ctx.clip("evenodd");
 
         knife.draw(ctx, tx, ty, w - Math.PI/2 + wobAngle, t, 1.18);
@@ -590,6 +675,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     }
 
     function drawZones() {
+      if (gs.phase === "breaking") return;
       for (const local of gs.stuck) {
         const w = local + gs.ang;
         ctx.save(); ctx.translate(CX, LOG_CY);
@@ -729,6 +815,146 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     // ── SCREEN SHAKE ────────────────────────────────────────────────────────
     // A short, decaying random jitter applied to the whole canvas transform
     // on impact, giving the strike physical weight.
+    function spawnBreakPieces(angle) {
+      gs.breakPieces = [];
+      const count = 46;
+      for (let i=0;i<count;i++) {
+        const base = (i / count) * Math.PI * 2;
+        const bias = Math.cos(base - angle) > 0 ? 0.9 : 0.45;
+        const dir = base + (Math.random()-0.5) * 0.6;
+        const startR = 18 + Math.random() * (LOG_R - 24);
+        const speed = (2.2 + Math.random()*4.2) * bias;
+        gs.breakPieces.push({
+          x: CX + Math.cos(base) * startR,
+          y: LOG_CY + Math.sin(base) * startR,
+          vx: Math.cos(dir) * speed,
+          vy: Math.sin(dir) * speed - 1.2,
+          rot: Math.random()*Math.PI*2,
+          vrot: (Math.random()-0.5)*0.35,
+          w: 8 + Math.random()*18,
+          h: 5 + Math.random()*12,
+          life: 1,
+          decay: 0.018 + Math.random()*0.01,
+          color: ["#9E6C42","#7A4E2A","#5C3818","#3A2410","#B07844"][Math.floor(Math.random()*5)],
+        });
+      }
+    }
+
+    function spawnFallingKnives() {
+      gs.fallingKnives = gs.stuck.map((local, i) => {
+        const world = local + gs.ang;
+        const launch = -0.8 - Math.random()*2.4;
+        const side = (Math.random() < 0.5 ? -1 : 1) * (1.2 + Math.random()*2.4);
+        return {
+          x: CX + Math.cos(world) * (LOG_R + 22),
+          y: LOG_CY + Math.sin(world) * (LOG_R + 22),
+          vx: Math.cos(world) * (0.8 + Math.random()*1.8) + side,
+          vy: Math.sin(world) * (0.8 + Math.random()*1.4) + launch,
+          a: world - Math.PI/2,
+          va: (Math.random() < 0.5 ? -1 : 1) * (0.10 + Math.random()*0.18),
+          life: 1,
+          delay: i * 2,
+        };
+      });
+    }
+
+    function startLevelBreak(hitAngle) {
+      gs.phase = "breaking";
+      gs.breaking = 1;
+      gs.breakFlash = 22;
+      gs.breakFallDir = Math.cos(hitAngle) >= 0 ? 1 : -1;
+      gs.apple = null;
+      queuedThrow = false;
+      spawnBreakPieces(hitAngle);
+      spawnFallingKnives();
+      triggerShake(12);
+    }
+
+    function finishLevelBreak() {
+      gs.level++;
+      gs.spd = (0.020 + (gs.level-1)*0.007) * map.speedMod;
+      if (gs.spd > 0.10 * map.speedMod) gs.spd = 0.10 * map.speedMod;
+      gs.left = 7;
+      gs.stuck = [];
+      gs.breakPieces = [];
+      gs.fallingKnives = [];
+      gs.breaking = 0;
+      gs.breakFlash = 0;
+      wobbles.length = 0;
+      gs.phase = "idle";
+      trySpawnApple();
+      releaseQueuedThrow();
+    }
+
+    function drawBreakingWood(t) {
+      if (gs.breaking <= 0) return;
+      const p = Math.min(1, gs.breaking / 58);
+      const fall = getFallingLogTransform();
+
+      if (gs.breakFlash > 0) {
+        const fp = gs.breakFlash / 22;
+        const glow = ctx.createRadialGradient(fall.x, fall.y, 0, fall.x, fall.y, LOG_R + 70);
+        glow.addColorStop(0, `rgba(255,245,210,${0.55*fp})`);
+        glow.addColorStop(0.45, `rgba(255,185,80,${0.28*fp})`);
+        glow.addColorStop(1, "rgba(255,185,80,0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(fall.x, fall.y, LOG_R + 70, 0, Math.PI*2); ctx.fill();
+        gs.breakFlash--;
+      }
+
+      for (let i=gs.breakPieces.length-1;i>=0;i--) {
+        const piece = gs.breakPieces[i];
+        piece.x += piece.vx;
+        piece.y += piece.vy;
+        piece.vy += 0.18;
+        piece.vx *= 0.985;
+        piece.rot += piece.vrot;
+        piece.life -= piece.decay;
+        if (piece.life <= 0) { gs.breakPieces.splice(i,1); continue; }
+
+        ctx.save();
+        ctx.translate(piece.x, piece.y);
+        ctx.rotate(piece.rot);
+        ctx.globalAlpha = Math.max(0, piece.life);
+        ctx.fillStyle = piece.color;
+        ctx.beginPath();
+        ctx.moveTo(-piece.w*0.5, -piece.h*0.4);
+        ctx.lineTo(piece.w*0.45, -piece.h*0.5);
+        ctx.lineTo(piece.w*0.55, piece.h*0.25);
+        ctx.lineTo(-piece.w*0.25, piece.h*0.55);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "rgba(42,20,8,0.45)";
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      for (let i=gs.fallingKnives.length-1;i>=0;i--) {
+        const fk = gs.fallingKnives[i];
+        if (fk.delay > 0) { fk.delay--; continue; }
+        fk.x += fk.vx;
+        fk.y += fk.vy;
+        fk.vy += 0.26;
+        fk.vx *= 0.985;
+        fk.a += fk.va;
+        fk.life -= 0.007;
+
+        if (fk.y > H - 24) {
+          fk.y = H - 24;
+          fk.vy *= -0.20;
+          fk.vx *= 0.72;
+          fk.va *= 0.70;
+        }
+
+        if (fk.life <= 0) { gs.fallingKnives.splice(i,1); continue; }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, fk.life));
+        knife.draw(ctx, fk.x, fk.y, fk.a, t, 1.08);
+        ctx.restore();
+      }
+    }
+
     function triggerShake(strength) {
       gs.shakeT = 8;
       gs.shakeMag = strength;
@@ -764,6 +990,10 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     function frame() {
       if (gs.over) return;
       gs.ang += gs.spd;
+      if (gs.phase === "breaking") {
+        gs.breaking++;
+        if (gs.breaking > 58) finishLevelBreak();
+      }
       if (gs.phase === "flying" && gs.flying) {
         const f = gs.flying;
         f.y += f.vy; if (f.vy < -2) f.vy += 0.55;
@@ -773,8 +1003,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
         // The apple now floats just outside the log's edge, so the flying
         // knife reaches it slightly before it would reach the wood itself.
         // We check this independently of the log-collision distance below,
-        // and skip the log-collision check entirely this frame if it hits.
-        let appleConsumedThrow = false;
+        // Apple hits give the bonus, but the knife keeps flying into the log.
         if (gs.apple) {
           const appleWorld = norm(gs.apple.local + gs.ang);
           const ax = CX + Math.cos(appleWorld) * APPLE_R;
@@ -782,21 +1011,18 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
           const adx = f.x - ax, ady = f.y - ay;
           const appleDist = Math.sqrt(adx*adx + ady*ady);
           if (appleDist <= APPLE_HIT_RADIUS) {
-            appleConsumedThrow = true;
             gs.appleBurstPt = { x: ax, y: ay };
             gs.apple = null;
             gs.appleBurst = 14;
-            gs.flying = null; gs.phase = "idle";
             gs.impactPt = { angle: appleWorld };
             spawnChips(appleWorld);
             triggerShake(3);
             snd.coin();
             if (onCoins) onCoins(10);
-            releaseQueuedThrow();
           }
         }
 
-        if (!appleConsumedThrow && dist <= LOG_R) {
+        if (dist <= LOG_R) {
           const ig = Math.atan2(dy, dx);
           const { hit, local } = checkHit(ig);
           if (hit) {
@@ -815,11 +1041,9 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
             triggerShake(4);
             gs.score++; gs.left--; gs.flash = 10; snd.hit();
             if (gs.left <= 0) {
-              gs.level++; gs.spd = (0.020 + (gs.level-1)*0.007) * map.speedMod;
-              if (gs.spd > 0.10 * map.speedMod) gs.spd = 0.10 * map.speedMod;
-              gs.left = 7; gs.stuck = [];
-              wobbles.length = 0;
-              trySpawnApple();    // new level — chance for a fresh bonus apple
+              startLevelBreak(ig);
+              gs.apple = null;     // clear any unhit apple — it shouldn't carry into the new level
+              trySpawnApple();      // fresh roll for a brand-new bonus apple
             }
             releaseQueuedThrow();   // fire any buffered tap/space press immediately
           }
@@ -834,7 +1058,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
       ctx.save();
       ctx.translate(shake.x, shake.y);
 
-      drawBg(t); drawLog(); drawZones(); drawApple(t); drawStuck(t);
+      drawBg(t); drawLog(); drawZones(); drawApple(t); drawStuck(t); drawBreakingWood(t);
       updateAndDrawChips();
       if (gs.flying) knife.draw(ctx, gs.flying.x, gs.flying.y, 0, t, 1.18);
       drawLauncher(t); drawHUD();
@@ -1475,8 +1699,8 @@ export default function App() {
     { id:"maps",      label:"Maps",     icon:"🗺" },
     { id:"inventory", label:"Knives",   icon:"⚔" },
     { id:"shop",      label:"Shop",     icon:"🏪" },
-    { id:"cases",     label:"Cases",    icon:"◻" },
-    { id:"board",     label:"Scores",   icon:"◆" },
+    { id:"cases",     label:"Cases",    icon:"📦" },
+    { id:"board",     label:"Scores",   icon:"🏆" },
     { id:"settings",  label:"Settings", icon:"⚙" },
   ];
 
@@ -1574,11 +1798,11 @@ export default function App() {
                 onClick={()=>setScreen("play")} accent={C.gold} />
               <ActionCard icon={activeMap.icon} label={activeMap.name} sub="Tap to change arena"
                 onClick={()=>setScreen("maps")} accent="#CC4488" />
-              <ActionCard icon="◻" label="Open a case" sub="Random knife inside"
+              <ActionCard icon="📦" label="Open a case" sub="Random knife inside"
                 onClick={()=>setScreen("cases")} accent="#7B5FCC" />
               <ActionCard icon="🏪" label="Buy knives" sub={`${KNIVES.length} skins available`}
                 onClick={()=>setScreen("shop")} accent={C.green} />
-              <ActionCard icon="◆" label="Leaderboard" sub="Top 10 scores"
+              <ActionCard icon="🏆" label="Leaderboard" sub="Top 10 scores"
                 onClick={()=>setScreen("board")} accent="#3A7EC0" />
             </div>
 
