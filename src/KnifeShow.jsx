@@ -762,9 +762,58 @@ function KnifePreview({ id, size = 60, spin = false }) {
   return <canvas ref={ref} width={size} height={size + 24} style={{ display: "block" }} />;
 }
 
-// ─── GAME CANVAS ─────────────────────────────────────────────────────────────
-function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
+function StartScenePreview({ equippedId, mapId }) {
+  const ref = useRef(null), raf = useRef(null);
+  useEffect(() => {
+    const canvas = ref.current; if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    const CX = W / 2, LOG_CY = 205, LOG_R = 100, LAUNCH_Y = H - 42;
+    const knife = KNIVES.find(k => k.id === equippedId) || KNIVES[0];
+    const map = MAPS.find(m => m.id === mapId) || MAPS[0];
+    const t0 = Date.now();
+
+    function drawPreviewLog(ang) {
+      ctx.save(); ctx.translate(CX, LOG_CY); ctx.rotate(ang);
+      ctx.beginPath(); ctx.arc(0,0,LOG_R,0,Math.PI*2); ctx.fillStyle="#4A2E14"; ctx.fill();
+      ctx.beginPath(); ctx.arc(0,0,LOG_R-4,0,Math.PI*2); ctx.fillStyle="#8A5A2D"; ctx.fill();
+      ["#9A6A38","#7A4E2A","#A8743D","#6A421E"].forEach((c,i)=>{
+        ctx.beginPath(); ctx.arc(2,1,(LOG_R-10)*(1-i*0.17),0,Math.PI*2);
+        ctx.strokeStyle=c; ctx.lineWidth=1.4; ctx.globalAlpha=0.7; ctx.stroke(); ctx.globalAlpha=1;
+      });
+      for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;ctx.beginPath();ctx.moveTo(Math.cos(a)*10,Math.sin(a)*10);ctx.lineTo(Math.cos(a)*(LOG_R-5),Math.sin(a)*(LOG_R-5));ctx.strokeStyle="rgba(40,18,4,0.22)";ctx.lineWidth=0.8;ctx.stroke();}
+      ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fillStyle="#2A1008"; ctx.fill();
+      ctx.restore();
+    }
+
+    function frame() {
+      const t = Date.now() - t0;
+      ctx.clearRect(0,0,W,H);
+      map.drawBackground(ctx, W, H, t, CX, LOG_CY);
+      drawPreviewLog(t * 0.00055);
+      ctx.fillStyle="#2A2620"; ctx.beginPath(); ctx.roundRect(CX-14,LAUNCH_Y+12,28,9,2); ctx.fill();
+      ctx.fillStyle="#383430"; ctx.beginPath(); ctx.roundRect(CX-9,LAUNCH_Y,18,14,2); ctx.fill();
+      raf.current = requestAnimationFrame(frame);
+    }
+
+    frame();
+    return () => { if (raf.current) cancelAnimationFrame(raf.current); };
+  }, [equippedId, mapId]);
+
+  return <canvas ref={ref} width={360} height={500} style={{ width:"100%", height:"100%", display:"block", borderRadius:10 }} />;
+}
+function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false }) {
   const ref = useRef(null), s = useRef(null), snd = useSound();
+  const hideReadyKnifeRef = useRef(hideReadyKnife);
+  const prevHideReadyKnifeRef = useRef(hideReadyKnife);
+  const readyKnifeRevealRef = useRef(0);
+  useEffect(() => {
+    if (prevHideReadyKnifeRef.current && !hideReadyKnife) {
+      readyKnifeRevealRef.current = performance.now();
+    }
+    hideReadyKnifeRef.current = hideReadyKnife;
+    prevHideReadyKnifeRef.current = hideReadyKnife;
+  }, [hideReadyKnife]);
   useEffect(() => {
     const canvas = ref.current, ctx = canvas.getContext("2d");
     const W = canvas.width, H = canvas.height;
@@ -1348,17 +1397,54 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     function drawLauncher(t) {
       ctx.fillStyle="#2A2620"; ctx.beginPath(); ctx.roundRect(CX-14,LAUNCH_Y+12,28,9,2); ctx.fill();
       ctx.fillStyle="#383430"; ctx.beginPath(); ctx.roundRect(CX-9,LAUNCH_Y,18,14,2); ctx.fill();
-      if (gs.phase === "idle" && gs.left > 0 && !gs.over)
-        knife.draw(ctx, CX, LAUNCH_Y - 8, 0, t, 1.18);
+      if (!hideReadyKnifeRef.current && gs.phase === "idle" && gs.left > 0 && !gs.over) {
+        const revealAge = readyKnifeRevealRef.current ? performance.now() - readyKnifeRevealRef.current : 999;
+        const revealP = Math.min(1, Math.max(0, revealAge / 260));
+        const settle = 1 - Math.pow(1 - revealP, 3);
+        ctx.save();
+        ctx.globalAlpha = revealP < 1 ? Math.max(0.08, settle) : 1;
+        knife.draw(ctx, CX, LAUNCH_Y - 8 - (1 - settle) * 10, 0, t, 1.12 + settle * 0.06);
+        ctx.restore();
+      }
     }
 
     function drawHUD() {
       ctx.fillStyle = "rgba(0,0,0,0.56)"; ctx.beginPath(); ctx.roundRect(8,31,W-16,23,4); ctx.fill();
       ctx.font = "bold 12px 'Courier New', monospace"; ctx.fillStyle = "#C89B3C";
       ctx.textAlign = "left";  ctx.fillText(`SCORE ${gs.score}`, 16, 47);
-      ctx.textAlign = "center"; ctx.fillStyle = "#8A8680"; ctx.fillText(`LV ${gs.level}`, CX, 47);
+      const iconGap = 11;
+      const startX = CX - ((gs.left - 1) * iconGap) / 2;
+      for (let i = 0; i < gs.left; i++) {
+        const x = startX + i * iconGap;
+        ctx.save();
+        ctx.translate(x, 45);
+        ctx.rotate(-0.12);
+        ctx.scale(0.45, 0.45);
+        ctx.fillStyle = "#B9B9B9";
+        ctx.beginPath();
+        ctx.moveTo(0, -18);
+        ctx.lineTo(4, -4);
+        ctx.lineTo(2, 7);
+        ctx.lineTo(-2, 7);
+        ctx.lineTo(-4, -4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#878787";
+        ctx.fillRect(-5, 7, 10, 3);
+        ctx.fillStyle = "#6F6F6F";
+        ctx.beginPath();
+        ctx.roundRect(-2.5, 10, 5, 11, 1.5);
+        ctx.fill();
+        ctx.strokeStyle = "#D0D0D0";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, -14);
+        ctx.lineTo(1.4, 4);
+        ctx.stroke();
+        ctx.restore();
+      }
       ctx.textAlign = "right"; ctx.fillStyle = "#8A8680";
-      ctx.fillText("▪".repeat(gs.left), W-12, 47);
+      ctx.fillText(`LV ${gs.level}`, W-16, 47);
     }
 
     function drawBg(t) {
@@ -2297,12 +2383,17 @@ export default function App() {
         {screen==="play" && (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:10 }}>
             <div style={{ position:"relative", width:360, maxWidth:"100%", height:500 }}>
+              {!gameStarted && !introLaunching && (
+                <div style={{ position:"absolute", inset:0, opacity:0.72, filter:"brightness(0.82) saturate(0.9)" }}>
+                  <StartScenePreview equippedId={save.equipped} mapId={save.activeMap} />
+                </div>
+              )}
               {gameStarted && (
                 <div style={{
                     position:"absolute", inset:0,
-                    animation:introLaunching ? "gameSceneReveal 0.72s cubic-bezier(.18,.82,.24,1) both" : "gamePopIn 0.42s cubic-bezier(.18,.82,.24,1) both",
+                    animation:introLaunching ? "gameSceneReveal 0.84s cubic-bezier(.18,.82,.24,1) both" : "gamePopIn 0.42s cubic-bezier(.18,.82,.24,1) both",
                   }}>
-                  <GameCanvas equippedId={save.equipped} mapId={save.activeMap} onEnd={onGameEnd} onCoins={onAppleCoins} key={gameKey + save.activeMap} />
+                  <GameCanvas equippedId={save.equipped} mapId={save.activeMap} onEnd={onGameEnd} onCoins={onAppleCoins} hideReadyKnife={introLaunching} key={gameKey + save.activeMap} />
                 </div>
               )}
               {(!gameStarted || introLaunching) && (
@@ -2315,31 +2406,31 @@ export default function App() {
                   snd.menu();
                   setTimeout(()=>{
                     setIntroLaunching(false);
-                  }, 720);
+                  }, 840);
                 }}
                 style={{
                   position:"absolute", left:0, top:0,
                   width:360, maxWidth:"100%", height:500, borderRadius:10,
                   border:`0.5px solid ${C.goldDim}`,
-                  background:"linear-gradient(180deg, rgba(20,16,10,0.98), rgba(10,8,7,0.98))",
+                  background:introLaunching ? "rgba(10,8,7,0.20)" : "rgba(10,8,7,0.42)",
                   color:C.gold, cursor:"pointer", display:"flex",
                   flexDirection:"column", alignItems:"center", justifyContent:"center",
                   boxShadow:"0 0 24px rgba(200,155,60,0.10), inset 0 0 40px rgba(200,155,60,0.04)",
                   fontFamily:"'Courier New',monospace",
                   overflow:"hidden",
-                  animation:introLaunching ? "startCardLaunch 0.72s ease both" : "startCardIn 0.55s ease both",
+                  animation:introLaunching ? "startCardLaunch 0.84s ease both" : "startCardIn 0.55s ease both",
                 }}>
                 <div style={{
                     position:"absolute", inset:0, pointerEvents:"none",
-                    background:"radial-gradient(circle at 50% 34%, rgba(200,155,60,0.14), rgba(200,155,60,0) 34%), radial-gradient(circle at 50% 72%, rgba(255,255,255,0.035), rgba(255,255,255,0) 28%)",
-                    animation:introLaunching ? "startGlowBurst 0.72s ease both" : "startGlowPulse 2.8s ease-in-out infinite",
+                    background:"linear-gradient(115deg, rgba(200,155,60,0) 18%, rgba(200,155,60,0.08) 44%, rgba(200,155,60,0) 72%), linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0) 42%)",
+                    animation:introLaunching ? "startGlowBurst 0.84s ease both" : "startGlowPulse 2.8s ease-in-out infinite",
                   }} />
                 <div style={{
                     width:174, height:174, borderRadius:"50%", display:"flex",
                     alignItems:"center", justifyContent:"center", marginBottom:18,
-                    background:"radial-gradient(circle, rgba(200,155,60,0.20), rgba(0,0,0,0) 70%)",
-                    border:`0.5px solid ${C.border}`, position:"relative",
-                    animation:introLaunching ? "knifeToLauncher 0.72s cubic-bezier(.18,.82,.24,1) both" : "knifeFloat 2.4s ease-in-out infinite",
+                    background:"transparent",
+                    position:"relative",
+                    animation:introLaunching ? "knifeToLauncher 0.84s cubic-bezier(.18,.82,.24,1) both" : "knifeFloat 2.4s ease-in-out infinite",
                   }}>
                   <div style={{ animation:"knifeReveal 0.7s ease both" }}>
                     <KnifePreview id={save.equipped} size={150} spin />
@@ -2360,8 +2451,8 @@ export default function App() {
                 }
                 @keyframes startCardLaunch {
                   0% { opacity:1; transform:translateY(0) scale(1); }
-                  54% { opacity:0.94; transform:translateY(0) scale(1); }
-                  100% { opacity:0; transform:translateY(12px) scale(0.97); }
+                  82% { opacity:0.92; transform:translateY(0) scale(1); }
+                  100% { opacity:0; transform:translateY(0) scale(1); }
                 }
                 @keyframes knifeReveal {
                   from { opacity:0; transform:translateY(18px) scale(0.88) rotate(-8deg); }
@@ -2373,9 +2464,10 @@ export default function App() {
                 }
                 @keyframes knifeToLauncher {
                   0% { transform:translateY(0) scale(1) rotate(0); opacity:1; }
-                  34% { transform:translateY(-28px) scale(1.08) rotate(10deg); opacity:1; }
-                  76% { transform:translateY(132px) scale(0.84) rotate(0); opacity:0.7; }
-                  100% { transform:translateY(154px) scale(0.78) rotate(0); opacity:0; }
+                  30% { transform:translateY(-28px) scale(1.08) rotate(10deg); opacity:1; }
+                  70% { transform:translateY(146px) scale(0.84) rotate(2deg); opacity:1; }
+                  88% { transform:translateY(172px) scale(0.78) rotate(0); opacity:1; }
+                  100% { transform:translateY(172px) scale(0.78) rotate(0); opacity:1; }
                 }
                 @keyframes startGlowPulse {
                   0%, 100% { opacity:0.72; transform:scale(1); }
