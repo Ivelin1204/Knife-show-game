@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 // ─── DESIGN TOKENS ───────────────────────────────────────────────────────────
 // Dark showroom palette: near-black walls, warm gold accents, coloured rarity
-// chips. Monospace data, sans-serif UI. Signature: the lobby hero is a live
 // spinning log preview — the product itself is always on stage.
 const C = {
   bg:       "#0E0C0A",
@@ -66,7 +65,7 @@ const KNIVES = [
   { id:"k_goldleaf",name:"Gold Leaf",     rarity:"legendary", cat:"Gold",     buyPrice:1200, value:480,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#C89B3C";ctx.beginPath();ctx.moveTo(0,-58);ctx.lineTo(4,-22);ctx.lineTo(4,2);ctx.lineTo(-4,2);ctx.lineTo(-4,-22);ctx.closePath();ctx.fill();const s=0.5+0.4*Math.sin(t*0.005);ctx.strokeStyle=`rgba(255,220,120,${s})`;ctx.lineWidth=2;[{x:-3,y:-46},{x:3,y:-32},{x:-3,y:-20}].forEach(p=>{ctx.beginPath();ctx.moveTo(p.x-3,p.y);ctx.lineTo(p.x+3,p.y+6);ctx.stroke();});ctx.fillStyle="#6A4A10";ctx.beginPath();ctx.roundRect(-4,2,8,9,2);ctx.fill();ctx.fillStyle="#C89B3C";ctx.beginPath();ctx.roundRect(-3,11,6,14,3);ctx.fill();ctx.restore(); }},
   { id:"k_diamond", name:"Diamond Edge",  rarity:"legendary", cat:"Diamond",  buyPrice:1200, value:480,
-    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#78AADC";ctx.beginPath();ctx.moveTo(0,-60);ctx.lineTo(5,-30);ctx.lineTo(5,-4);ctx.lineTo(-5,-4);ctx.lineTo(-5,-30);ctx.closePath();ctx.fill();ctx.fillStyle="#D8EEFF";ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(3,-40);ctx.lineTo(0,-36);ctx.lineTo(-3,-40);ctx.closePath();ctx.fill();const s=`rgba(200,230,255,${0.5+0.4*Math.sin(t*0.006)})`;ctx.strokeStyle=s;ctx.lineWidth=1.5;[[-4,-24],[-4,-14]].forEach(([px,py])=>{ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(-px,py+4);ctx.stroke();});ctx.fillStyle="#0A3060";ctx.beginPath();ctx.roundRect(-3,4,6,20,3);ctx.fill();ctx.restore(); }},
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#78AADC";ctx.beginPath();ctx.moveTo(0,-60);ctx.lineTo(5,-30);ctx.lineTo(5,-4);ctx.lineTo(-5,-4);ctx.lineTo(-5,-30);ctx.closePath();ctx.fill();ctx.fillStyle="#D8EEFF";ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(3,-40);ctx.lineTo(0,-36);ctx.lineTo(-3,-40);ctx.closePath();ctx.fill();const s=`rgba(200,230,255,${0.5+0.4*Math.sin(t*0.006)})`;ctx.strokeStyle=s;ctx.lineWidth=1.5;[[-4,-24],[-4,-14]].forEach(([px,py])=>{ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(-px,py+4);ctx.stroke();});ctx.fillStyle="#0A3060";ctx.beginPath();ctx.roundRect(-3,-4,6,28,3);ctx.fill();ctx.restore(); }},
 
   // ── MYTHIC (3) ────────────────────────────────────────────────────────────
   { id:"k_plasma",  name:"Plasma Shift",  rarity:"mythic",    cat:"Animated", buyPrice:3000, value:1200,
@@ -94,7 +93,7 @@ const CRATES = [
 // Difficulty and visual complexity both climb with tier.
 const MAPS = [
   // ── TIER 1 — Practice Yard ──────────────────────────────────────────────
-  { id:"yard", name:"Practice Yard", icon:"🪵", unlockScore:0, speedMod:1.00, coinRate:1,
+  { id:"yard", name:"Practice Yard", icon:"🪵", unlockScore:0, speedMod:1.08, coinRate:1,
     blurb:"Where every thrower starts. Plain, calm, forgiving.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -120,12 +119,12 @@ const MAPS = [
       // Header
       ctx.fillStyle="#161310"; ctx.fillRect(0,0,W,26);
       ctx.strokeStyle="#2E2920"; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(0,26); ctx.lineTo(W,26); ctx.stroke();
-      ctx.font="bold 9px 'Courier New',monospace"; ctx.fillStyle="#7A5E24"; ctx.textAlign="center";
-      ctx.fillText("🪵 PRACTICE YARD",CX,17);
+      ctx.font="bold 13px 'Courier New',monospace"; ctx.fillStyle="#7A5E24"; ctx.textAlign="center";
+      ctx.fillText("🪵 PRACTICE YARD",CX,18);
     }},
 
   // ── TIER 2 — Exhibition Hall ─────────────────────────────────────────────
-  { id:"hall", name:"Exhibition Hall", icon:"🏛️", unlockScore:15, speedMod:1.12, coinRate:2,
+  { id:"hall", name:"Exhibition Hall", icon:"🏛️", unlockScore:15, speedMod:1.20, coinRate:2,
     blurb:"Marble floors and velvet ropes. Crowds are starting to gather.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -156,12 +155,12 @@ const MAPS = [
       });
       // Header banner
       ctx.fillStyle="rgba(80,60,160,0.7)"; ctx.fillRect(0,0,W,27);
-      ctx.fillStyle="rgba(255,255,255,0.8)"; ctx.font="bold 9px sans-serif"; ctx.textAlign="center";
+      ctx.fillStyle="rgba(255,255,255,0.8)"; ctx.font="bold 13px sans-serif"; ctx.textAlign="center";
       ctx.fillText("🏛️ EXHIBITION HALL",CX,18);
     }},
 
   // ── TIER 3 — Neon District ────────────────────────────────────────────────
-  { id:"neon", name:"Neon District", icon:"🌆", unlockScore:35, speedMod:1.26, coinRate:3,
+  { id:"neon", name:"Neon District", icon:"🌆", unlockScore:35, speedMod:1.34, coinRate:3,
     blurb:"Rooftop throws under a buzzing skyline. Faster. Louder. Brighter.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -308,12 +307,12 @@ const MAPS = [
       // Header
       ctx.fillStyle="rgba(10,5,20,0.85)"; ctx.fillRect(0,0,W,27);
       ctx.strokeStyle=`rgba(255,40,160,${rimPulse})`; ctx.lineWidth=0.6; ctx.beginPath(); ctx.moveTo(0,27); ctx.lineTo(W,27); ctx.stroke();
-      ctx.fillStyle=`rgba(80,220,255,${0.7+0.3*Math.sin(t*0.006)})`; ctx.font="bold 9px 'Courier New',monospace"; ctx.textAlign="center";
+      ctx.fillStyle=`rgba(80,220,255,${0.7+0.3*Math.sin(t*0.006)})`; ctx.font="bold 13px 'Courier New',monospace"; ctx.textAlign="center";
       ctx.fillText("🌆 NEON DISTRICT",CX,18);
     }},
 
   // ── TIER 4 — Volcanic Forge ───────────────────────────────────────────────
-  { id:"forge", name:"Volcanic Forge", icon:"🌋", unlockScore:60, speedMod:1.42, coinRate:4,
+  { id:"forge", name:"Volcanic Forge", icon:"🌋", unlockScore:60, speedMod:1.50, coinRate:4,
     blurb:"Molten light, hammering heat. Only steady hands survive here.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -531,12 +530,12 @@ const MAPS = [
       // Header
       ctx.fillStyle="rgba(20,6,2,0.85)"; ctx.fillRect(0,0,W,27);
       ctx.strokeStyle=`rgba(255,120,40,${lavaGlow})`; ctx.lineWidth=0.8; ctx.beginPath(); ctx.moveTo(0,27); ctx.lineTo(W,27); ctx.stroke();
-      ctx.fillStyle=`rgba(255,150,60,${0.7+0.3*lavaGlow})`; ctx.font="bold 9px 'Courier New',monospace"; ctx.textAlign="center";
+      ctx.fillStyle=`rgba(255,150,60,${0.7+0.3*lavaGlow})`; ctx.font="bold 13px 'Courier New',monospace"; ctx.textAlign="center";
       ctx.fillText("🌋 VOLCANIC FORGE",CX,18);
     }},
 
   // ── TIER 5 — Celestial Arena ─────────────────────────────────────────────
-  { id:"celestial", name:"Celestial Arena", icon:"🌌", unlockScore:100, speedMod:1.60, coinRate:5,
+  { id:"celestial", name:"Celestial Arena", icon:"🌌", unlockScore:100, speedMod:1.68, coinRate:5,
     blurb:"The final stage. Stars, gold, and a crowd that never blinks.",
     drawBackground(ctx,W,H,t,CX,CY){
       // Deep space gradient
@@ -658,7 +657,7 @@ const MAPS = [
       ctx.fillStyle="rgba(10,6,24,0.85)"; ctx.fillRect(0,0,W,27);
       const headerGlow=0.6+0.4*Math.sin(t*0.005);
       ctx.strokeStyle=`rgba(232,200,120,${headerGlow})`; ctx.lineWidth=0.8; ctx.beginPath(); ctx.moveTo(0,27); ctx.lineTo(W,27); ctx.stroke();
-      ctx.fillStyle=`rgba(232,200,120,${0.75+0.25*headerGlow})`; ctx.font="bold 9px 'Courier New',monospace"; ctx.textAlign="center";
+      ctx.fillStyle=`rgba(232,200,120,${0.75+0.25*headerGlow})`; ctx.font="bold 13px 'Courier New',monospace"; ctx.textAlign="center";
       ctx.fillText("🌌 CELESTIAL ARENA",CX,18);
     }},
 ];
@@ -769,16 +768,17 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
   useEffect(() => {
     const canvas = ref.current, ctx = canvas.getContext("2d");
     const W = canvas.width, H = canvas.height;
-    const CX = W / 2, LOG_CY = 185, LOG_R = 100, LAUNCH_Y = H - 52;
+    const CX = W / 2, LOG_CY = 205, LOG_R = 100, LAUNCH_Y = H - 42;
     const COLL = 12 * Math.PI / 180;            // 12° collision threshold
     const APPLE_R = LOG_R + 26;                  // apple floats outside the log surface
     const APPLE_HIT_RADIUS = 24;                  // generous pixel hit-radius around the apple (bigger = easier to hit)
+    const LOG_KNIFE_HIT_R = LOG_R + 44;           // catch the blade tip before the handle overlaps the wood
     const knife = KNIVES.find(k => k.id === equippedId) || KNIVES[0];
     const map   = MAPS.find(m => m.id === mapId) || MAPS[0];
     const t0 = WORLD_CLOCK_START;
 
     s.current = {
-      ang: 0, spd: 0.020 * map.speedMod, score: 0, level: 1,
+      ang: 0, spd: 0.020 * map.speedMod, spinDir: 1, spinTimer: 0, spinBrake: 0, spinPause: 0, spinRamp: 0, score: 0, level: 1,
       left: 7, stuck: [], over: false,
       phase: "idle", flying: null, flash: 0,
       particles: [],      // wood-chip burst on impact
@@ -793,6 +793,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
       apple: null,           // { local, bornAt } — bonus apple stuck to the spinning log, or null
       appleBurst: 0,         // gold sparkle burst counter when apple is hit
       appleBurstPt: null,    // world {x,y} where the burst sparkles render
+      applePieces: [],       // red peel / pale fruit chunks when apple breaks
     };
     const gs = s.current;
     // Per-stuck-knife settle wobble: index-aligned with gs.stuck.
@@ -823,6 +824,74 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
 
     function norm(a) { while (a > Math.PI) a -= 2*Math.PI; while (a < -Math.PI) a += 2*Math.PI; return a; }
     function adist(a, b) { let d = Math.abs(norm(a-b)); return d > Math.PI ? 2*Math.PI - d : d; }
+
+    function obstacleCountForLevel(level) {
+      if (level >= 9) return 3;
+      if (level >= 6) return 2;
+      if (level >= 4) return 1;
+      return 0;
+    }
+
+    function spinStep() {
+      if (gs.level < 3) return gs.spd * gs.spinDir;
+
+      const reverseLevel = gs.level >= 7;
+      const interval = Math.max(82, 210 - gs.level * 12);
+      const brakeLen = reverseLevel ? 86 : 72;
+      const pauseLen = reverseLevel ? 20 : 12;
+      const rampLen = reverseLevel ? 42 : 34;
+
+      const smooth = (p) => p * p * (3 - 2 * p);
+
+      if (gs.spinBrake > 0) {
+        const p = gs.spinBrake / brakeLen;
+        const ease = smooth(p) * p;
+        gs.spinBrake--;
+        if (gs.spinBrake === 0) gs.spinPause = pauseLen;
+        return gs.spd * gs.spinDir * ease;
+      }
+
+      if (gs.spinPause > 0) {
+        gs.spinPause--;
+        if (gs.spinPause === 0) {
+          if (reverseLevel) gs.spinDir *= -1;
+          gs.spinRamp = rampLen;
+        }
+        return 0;
+      }
+
+      if (gs.spinRamp > 0) {
+        const ease = smooth(1 - gs.spinRamp / rampLen);
+        gs.spinRamp--;
+        return gs.spd * gs.spinDir * ease;
+      }
+
+      gs.spinTimer++;
+      if (gs.spinTimer >= interval) {
+        gs.spinTimer = 0;
+        gs.spinBrake = brakeLen;
+        return gs.spd * gs.spinDir;
+      }
+
+      return gs.spd * gs.spinDir;
+    }
+
+    function seedObstacleKnives() {
+      const count = obstacleCountForLevel(gs.level);
+      gs.stuck = [];
+      if (!count) return;
+
+      const start = Math.random() * Math.PI * 2;
+      for (let i=0;i<count;i++) {
+        let local = norm(start + (i/count)*Math.PI*2 + (Math.random()-0.5)*0.45);
+        let attempts = 0;
+        while (attempts < 16 && gs.stuck.some(sk => adist(local, sk) < COLL*3.2)) {
+          local = Math.random() * Math.PI * 2;
+          attempts++;
+        }
+        gs.stuck.push(local);
+      }
+    }
 
     function checkHit(ig) {
       const local = norm(ig - gs.ang);
@@ -944,21 +1013,32 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     }
 
     function drawZones() {
-      if (gs.phase === "breaking") return;
-      for (const local of gs.stuck) {
-        const w = local + gs.ang;
-        ctx.save(); ctx.translate(CX, LOG_CY);
-        ctx.beginPath(); ctx.moveTo(0,0);
-        ctx.arc(0,0,LOG_R+10,w-COLL,w+COLL); ctx.closePath();
-        ctx.fillStyle = "rgba(180,40,40,0.09)"; ctx.fill();
-        ctx.restore();
-      }
+      // Collision zones are kept invisible so the wood stays clean during play.
     }
 
     // ── DRAW BONUS APPLE ────────────────────────────────────────────────────
     // Sits embedded on the log surface like a target, spinning with it.
     // Small glossy red apple + stem + leaf, with a soft pulsing glow so it
     // reads clearly as a bonus target against the wood.
+    function spawnAppleBreak(x, y) {
+      const colors = ["#C23B2E","#E0523E","#F4D9A6","#FFF0C8","#5C3818","#4A9460"];
+      for (let i=0;i<18;i++) {
+        const a = (i/18)*Math.PI*2 + (Math.random()-0.5)*0.7;
+        const speed = 1.4 + Math.random()*3.8;
+        gs.applePieces.push({
+          x, y,
+          vx: Math.cos(a)*speed,
+          vy: Math.sin(a)*speed - 1.2,
+          rot: Math.random()*Math.PI*2,
+          vrot: (Math.random()-0.5)*0.45,
+          size: 2 + Math.random()*4,
+          life: 1,
+          decay: 0.026 + Math.random()*0.018,
+          color: colors[Math.floor(Math.random()*colors.length)],
+        });
+      }
+    }
+
     function drawApple(t) {
       if (gs.apple) {
         const w = gs.apple.local + gs.ang;
@@ -1022,6 +1102,31 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
           ctx.fill();
         }
         gs.appleBurst--;
+      }
+
+      for (let i=gs.applePieces.length-1;i>=0;i--) {
+        const p = gs.applePieces[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.16;
+        p.vx *= 0.985;
+        p.rot += p.vrot;
+        p.life -= p.decay;
+        if (p.life <= 0) { gs.applePieces.splice(i,1); continue; }
+
+        ctx.save();
+        ctx.translate(p.x,p.y);
+        ctx.rotate(p.rot);
+        ctx.globalAlpha = Math.max(0,p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.moveTo(-p.size,-p.size*0.5);
+        ctx.lineTo(p.size*0.8,-p.size*0.2);
+        ctx.lineTo(p.size*0.3,p.size*0.8);
+        ctx.lineTo(-p.size*0.6,p.size*0.4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
       }
     }
 
@@ -1143,8 +1248,13 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
       gs.level++;
       gs.spd = (0.020 + (gs.level-1)*0.007) * map.speedMod;
       if (gs.spd > 0.10 * map.speedMod) gs.spd = 0.10 * map.speedMod;
+      gs.spinTimer = 0;
+      gs.spinBrake = 0;
+      gs.spinPause = 0;
+      gs.spinRamp = 0;
+      if (gs.level < 7) gs.spinDir = 1;
       gs.left = 7;
-      gs.stuck = [];
+      seedObstacleKnives();
       gs.breakPieces = [];
       gs.fallingKnives = [];
       gs.breaking = 0;
@@ -1243,12 +1353,12 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
     }
 
     function drawHUD() {
-      ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.beginPath(); ctx.roundRect(8,32,W-16,18,3); ctx.fill();
-      ctx.font = "bold 10px 'Courier New', monospace"; ctx.fillStyle = "#C89B3C";
-      ctx.textAlign = "left";  ctx.fillText(`SCORE ${gs.score}`, 16, 44);
-      ctx.textAlign = "center"; ctx.fillStyle = "#8A8680"; ctx.fillText(`LV ${gs.level}`, CX, 44);
+      ctx.fillStyle = "rgba(0,0,0,0.56)"; ctx.beginPath(); ctx.roundRect(8,31,W-16,23,4); ctx.fill();
+      ctx.font = "bold 12px 'Courier New', monospace"; ctx.fillStyle = "#C89B3C";
+      ctx.textAlign = "left";  ctx.fillText(`SCORE ${gs.score}`, 16, 47);
+      ctx.textAlign = "center"; ctx.fillStyle = "#8A8680"; ctx.fillText(`LV ${gs.level}`, CX, 47);
       ctx.textAlign = "right"; ctx.fillStyle = "#8A8680";
-      ctx.fillText("▪".repeat(gs.left), W-12, 44);
+      ctx.fillText("▪".repeat(gs.left), W-12, 47);
     }
 
     function drawBg(t) {
@@ -1258,7 +1368,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
 
     function frame() {
       if (gs.over) return;
-      gs.ang += gs.spd;
+      gs.ang += spinStep();
       if (gs.phase === "breaking") {
         gs.breaking++;
         if (gs.breaking > 58) finishLevelBreak();
@@ -1283,6 +1393,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
             gs.appleBurstPt = { x: ax, y: ay };
             gs.apple = null;
             gs.appleBurst = 14;
+            spawnAppleBreak(ax, ay);
             gs.impactPt = { angle: appleWorld };
             spawnChips(appleWorld);
             triggerShake(3);
@@ -1291,7 +1402,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
           }
         }
 
-        if (dist <= LOG_R) {
+        if (dist <= LOG_KNIFE_HIT_R) {
           const ig = Math.atan2(dy, dx);
           const { hit, local } = checkHit(ig);
           if (hit) {
@@ -1387,7 +1498,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins }) {
   }, [equippedId]);
 
   return (
-    <canvas ref={ref} width={400} height={460}
+    <canvas ref={ref} width={400} height={500}
       style={{ display:"block", cursor:"crosshair", borderRadius:8,
                border:`0.5px solid ${C.border}`, boxShadow:`0 0 40px rgba(200,155,60,0.06)`,
                maxWidth:"100%" }} />
@@ -1827,13 +1938,17 @@ function SectionHead({ children }) {
 // ─── APP ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const [save, setSave]           = useState(null);
-  const [screen, setScreen]       = useState("lobby");
+  const [screen, setScreen]       = useState("play");
   const [inspecting, setInspecting] = useState(null);
   const [openCase, setOpenCase]   = useState(null);
   const [toast, setToast]         = useState(null);
   const [catFilter, setCatFilter] = useState("All");
   const [gameKey, setGameKey]     = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [introLaunching, setIntroLaunching] = useState(false);
   const [soundOn, setSoundOn]     = useState(true);   // mirrors SOUND_MUTED
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
   const snd = useSound();
 
   // ── Persist ──
@@ -1870,6 +1985,14 @@ export default function App() {
     setTimeout(() => setToast(null), 2800);
   }
 
+  function renamePlayer(name) {
+    const clean = name.trim().slice(0, 18) || "Player";
+    upd(p => { p.name = clean; return p; });
+    setEditingName(false);
+    setNameDraft("");
+    toast$("Player name saved", true);
+  }
+
   // ── Game end ──
   function onGameEnd(score) {
     const playedMap = MAPS.find(m => m.id === save.activeMap) || MAPS[0];
@@ -1883,6 +2006,7 @@ export default function App() {
       return p;
     });
     toast$(`Game over · +${coins} 🪙`, true);
+    setIntroLaunching(false);
     setGameKey(k => k + 1); // remount after short delay
   }
 
@@ -1962,8 +2086,22 @@ export default function App() {
   }
   board.sort((a,b) => b.score - a.score);
 
+  const ownedKnives = KNIVES.filter(k => save.inventory.includes(k.id));
+  const ownedValue = ownedKnives.reduce((sum, k) => sum + (k.value || 0), 0);
+  const avgScore = save.stats.games ? (save.stats.score / save.stats.games).toFixed(1) : "0.0";
+  const avgThrows = save.stats.games ? (save.stats.throws / save.stats.games).toFixed(1) : "0.0";
+  const collectionPct = Math.round((save.inventory.length / KNIVES.length) * 100);
+  const playerRank = save.stats.score > 0
+    ? board.findIndex(entry => entry.isMe) + 1
+    : null;
+  const unlockedMaps = MAPS.filter(m => save.stats.score >= m.unlockScore).length;
+  const rarityOrder = ["common","uncommon","rare","epic","legendary","mythic"];
+  const rarestOwned = ownedKnives.slice().sort(
+    (a,b) => rarityOrder.indexOf(b.rarity) - rarityOrder.indexOf(a.rarity)
+  )[0] || equippedKnife;
+
   const NAV = [
-    { id:"lobby",     label:"Lobby",    icon:"◈" },
+    { id:"stats",     label:"Stats",    icon:"▦" },
     { id:"play",      label:"Play",     icon:"▶" },
     { id:"maps",      label:"Maps",     icon:"🗺" },
     { id:"inventory", label:"Knives",   icon:"⚔" },
@@ -2032,98 +2170,244 @@ export default function App() {
       {/* ── SCREENS ── */}
       <div style={{ padding:"16px 14px" }}>
 
-        {/* ══ LOBBY ══ */}
-        {screen==="lobby" && (
+        {/* ══ PLAYER STATS ══ */}
+        {screen==="stats" && (
           <div>
-            {/* Hero: live spinning log + equipped knife */}
-            <div style={{ textAlign:"center", marginBottom:20 }}>
-              <HeroDisplay equippedKnife={equippedKnife} />
-              <div style={{ marginTop:8 }}>
-                <span style={{ fontWeight:700, fontSize:14, color:C.text }}>{equippedKnife.name}</span>
-                <span style={{ marginLeft:8 }}><Badge rarity={equippedKnife.rarity} /></span>
-              </div>
-              <div style={{ fontSize:11, color:C.textDim, marginTop:2 }}>
-                {equippedKnife.cat} · 🪙{equippedKnife.value} sell value
+            <SectionHead>PLAYER STATS</SectionHead>
+
+            <div style={{ border:`0.5px solid ${C.borderHi}`, borderRadius:10,
+                padding:"16px", background:C.surface, marginBottom:12 }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12 }}>
+                <div>
+                  <div style={{ fontSize:10, color:C.textDim, fontFamily:"monospace",
+                      letterSpacing:"0.1em", marginBottom:4 }}>PLAYER</div>
+                  {!editingName ? (
+                    <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+                      <div style={{ fontSize:22, fontWeight:800, color:C.gold,
+                          fontFamily:"'Courier New',monospace" }}>{save.name}</div>
+                      <button
+                        title="Change player name"
+                        onClick={()=>{
+                          setNameDraft(save.name);
+                          setEditingName(true);
+                        }}
+                        style={{
+                          width:28, height:28, borderRadius:5, cursor:"pointer",
+                          border:`0.5px solid ${C.goldDim}`, background:C.gold+"12",
+                          color:C.gold, fontSize:14, fontWeight:800, lineHeight:"26px",
+                          fontFamily:"'Courier New',monospace",
+                        }}>
+                        ✎
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+                      <input
+                        value={nameDraft}
+                        maxLength={18}
+                        autoFocus
+                        onChange={(e)=>setNameDraft(e.target.value)}
+                        onKeyDown={(e)=>{
+                          if (e.key === "Enter") renamePlayer(nameDraft);
+                          if (e.key === "Escape") setEditingName(false);
+                        }}
+                        style={{
+                          width:180, maxWidth:"100%", padding:"7px 9px", borderRadius:5,
+                          border:`0.5px solid ${C.borderHi}`, background:"rgba(0,0,0,0.24)",
+                          color:C.gold, outline:"none", fontSize:18, fontWeight:800,
+                          fontFamily:"'Courier New',monospace",
+                        }}
+                      />
+                      <button
+                        onClick={()=>renamePlayer(nameDraft)}
+                        style={{ ...BtnStyle(C.gold,C.goldDim), padding:"7px 14px", fontSize:10 }}>
+                        Save
+                      </button>
+                      <button
+                        onClick={()=>{
+                          setEditingName(false);
+                          setNameDraft("");
+                        }}
+                        style={{ ...BtnStyle(), padding:"7px 10px", fontSize:10 }}>
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div style={{ textAlign:"right", fontSize:11, color:C.textDim, lineHeight:1.7 }}>
+                  <div>Rank: <span style={{ color:C.gold, fontWeight:700 }}>
+                    {playerRank ? `#${playerRank}` : "Not ranked"}
+                  </span></div>
+                  <div>Balance: <span style={{ color:C.gold, fontWeight:700 }}>🪙 {save.coins}</span></div>
+                </div>
               </div>
             </div>
 
-            {/* Stats row */}
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8, marginBottom:16 }}>
-              {[["BEST SCORE",save.stats.score],["GAMES PLAYED",save.stats.games],["KNIVES OWNED",save.inventory.length]].map(([l,v])=>(
-                <div key={l} style={{ background:C.surface, border:`0.5px solid ${C.border}`,
-                    borderRadius:6, padding:"10px 8px", textAlign:"center" }}>
+            <SectionHead>GAMEPLAY</SectionHead>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",
+                gap:8, marginBottom:14 }}>
+              {[
+                ["BEST SCORE", save.stats.score],
+                ["GAMES PLAYED", save.stats.games],
+                ["TOTAL THROWS", save.stats.throws],
+                ["AVG THROWS/GAME", avgThrows],
+                ["MAPS UNLOCKED", `${unlockedMaps}/${MAPS.length}`],
+                ["ACTIVE MAP", activeMap.name],
+              ].map(([label,value])=>(
+                <div key={label} style={{ border:`0.5px solid ${C.border}`, borderRadius:7,
+                    background:"rgba(255,255,255,0.02)", padding:"12px 10px", textAlign:"center" }}>
                   <div style={{ fontSize:8, color:C.textDim, fontFamily:"monospace",
-                      letterSpacing:"0.08em", marginBottom:4 }}>{l}</div>
-                  <div style={{ fontWeight:700, fontSize:20, color:C.gold,
-                      fontFamily:"'Courier New',monospace" }}>{v}</div>
+                      letterSpacing:"0.08em", marginBottom:5 }}>{label}</div>
+                  <div style={{ fontWeight:800, fontSize:18, color:C.gold,
+                      fontFamily:"'Courier New',monospace", wordBreak:"break-word" }}>
+                    {value}
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Quick actions */}
-            <SectionHead>QUICK ACTIONS</SectionHead>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:16 }}>
-              <ActionCard icon="▶" label="Throw knives" sub={`Earn ${activeMap.coinRate ?? 5}🪙 per hit`}
-                onClick={()=>setScreen("play")} accent={C.gold} />
-              <ActionCard icon={activeMap.icon} label={activeMap.name} sub="Tap to change arena"
-                onClick={()=>setScreen("maps")} accent="#CC4488" />
-              <ActionCard icon="📦" label="Open a case" sub="Random knife inside"
-                onClick={()=>setScreen("cases")} accent="#7B5FCC" />
-              <ActionCard icon="🏪" label="Buy knives" sub={`${KNIVES.length} skins available`}
-                onClick={()=>setScreen("shop")} accent={C.green} />
-              <ActionCard icon="🏆" label="Leaderboard" sub="Top 10 scores"
-                onClick={()=>setScreen("board")} accent="#3A7EC0" />
+            <SectionHead>COLLECTION</SectionHead>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",
+                gap:8, marginBottom:14 }}>
+              {[
+                ["KNIVES OWNED", `${save.inventory.length}/${KNIVES.length}`],
+                ["COLLECTION", `${collectionPct}%`],
+                ["SELL VALUE", `🪙 ${ownedValue.toLocaleString()}`],
+                ["RAREST KNIFE", rarestOwned.name],
+                ["EQUIPPED", equippedKnife.name],
+                ["EQUIPPED VALUE", `🪙 ${equippedKnife.value}`],
+              ].map(([label,value])=>(
+                <div key={label} style={{ border:`0.5px solid ${C.border}`, borderRadius:7,
+                    background:"rgba(255,255,255,0.02)", padding:"12px 10px", textAlign:"center" }}>
+                  <div style={{ fontSize:8, color:C.textDim, fontFamily:"monospace",
+                      letterSpacing:"0.08em", marginBottom:5 }}>{label}</div>
+                  <div style={{ fontWeight:800, fontSize:16,
+                      color: label==="RAREST KNIFE" ? RARITIES[rarestOwned.rarity].color : C.gold,
+                      fontFamily:"'Courier New',monospace", wordBreak:"break-word" }}>
+                    {value}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* Rarity table */}
-            <SectionHead>DROP CHANCE TABLE</SectionHead>
-            <div style={{ border:`0.5px solid ${C.border}`, borderRadius:8, overflow:"hidden", marginBottom:4 }}>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", background:C.surface,
-                  padding:"6px 12px", borderBottom:`0.5px solid ${C.border}` }}>
-                {["RARITY","CHANCE","SELL VALUE"].map(h=>(
-                  <span key={h} style={{ fontSize:9, color:C.textDim, fontFamily:"monospace",
-                      letterSpacing:"0.06em", fontWeight:700 }}>{h}</span>
-                ))}
-              </div>
-              {Object.entries(RARITIES).map(([key,r])=>{
-                const eg = KNIVES.find(k=>k.rarity===key);
-                return (
-                  <div key={key} style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr",
-                      padding:"7px 12px", borderBottom:`0.5px solid ${C.border}`,
-                      background:"transparent" }}>
-                    <span style={{ fontSize:11, color:r.color, fontWeight:600 }}>{r.label}</span>
-                    <span style={{ fontSize:11, color:C.textMid, fontFamily:"monospace" }}>
-                      {r.drop<0.01?`${(r.drop*100).toFixed(1)}%`:`${r.drop*100}%`}
-                    </span>
-                    <span style={{ fontSize:11, color:C.textDim, fontFamily:"monospace" }}>
-                      {eg ? `🪙${eg.value}` : "–"}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         )}
 
         {/* ══ PLAY ══ */}
         {screen==="play" && (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:10 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:2 }}>
-              <div style={{ fontSize:10, color:C.textDim, fontFamily:"monospace", letterSpacing:"0.06em" }}>
-                ⚔ <span style={{ color:C.gold }}>{equippedKnife.name}</span>
-              </div>
-              <div style={{ fontSize:10, color:C.textDim, fontFamily:"monospace", letterSpacing:"0.06em" }}>
-                {activeMap.icon} <span style={{ color:C.gold }}>{activeMap.name}</span>
-                &nbsp;·&nbsp;×{activeMap.speedMod.toFixed(2)} speed
-              </div>
+            <div style={{ position:"relative", width:360, maxWidth:"100%", height:500 }}>
+              {gameStarted && (
+                <div style={{
+                    position:"absolute", inset:0,
+                    animation:introLaunching ? "gameSceneReveal 0.72s cubic-bezier(.18,.82,.24,1) both" : "gamePopIn 0.42s cubic-bezier(.18,.82,.24,1) both",
+                  }}>
+                  <GameCanvas equippedId={save.equipped} mapId={save.activeMap} onEnd={onGameEnd} onCoins={onAppleCoins} key={gameKey + save.activeMap} />
+                </div>
+              )}
+              {(!gameStarted || introLaunching) && (
+              <button
+                onClick={()=>{
+                  if (introLaunching) return;
+                  setIntroLaunching(true);
+                  setGameStarted(true);
+                  setGameKey(k=>k+1);
+                  snd.menu();
+                  setTimeout(()=>{
+                    setIntroLaunching(false);
+                  }, 720);
+                }}
+                style={{
+                  position:"absolute", left:0, top:0,
+                  width:360, maxWidth:"100%", height:500, borderRadius:10,
+                  border:`0.5px solid ${C.goldDim}`,
+                  background:"linear-gradient(180deg, rgba(20,16,10,0.98), rgba(10,8,7,0.98))",
+                  color:C.gold, cursor:"pointer", display:"flex",
+                  flexDirection:"column", alignItems:"center", justifyContent:"center",
+                  boxShadow:"0 0 24px rgba(200,155,60,0.10), inset 0 0 40px rgba(200,155,60,0.04)",
+                  fontFamily:"'Courier New',monospace",
+                  overflow:"hidden",
+                  animation:introLaunching ? "startCardLaunch 0.72s ease both" : "startCardIn 0.55s ease both",
+                }}>
+                <div style={{
+                    position:"absolute", inset:0, pointerEvents:"none",
+                    background:"radial-gradient(circle at 50% 34%, rgba(200,155,60,0.14), rgba(200,155,60,0) 34%), radial-gradient(circle at 50% 72%, rgba(255,255,255,0.035), rgba(255,255,255,0) 28%)",
+                    animation:introLaunching ? "startGlowBurst 0.72s ease both" : "startGlowPulse 2.8s ease-in-out infinite",
+                  }} />
+                <div style={{
+                    width:174, height:174, borderRadius:"50%", display:"flex",
+                    alignItems:"center", justifyContent:"center", marginBottom:18,
+                    background:"radial-gradient(circle, rgba(200,155,60,0.20), rgba(0,0,0,0) 70%)",
+                    border:`0.5px solid ${C.border}`, position:"relative",
+                    animation:introLaunching ? "knifeToLauncher 0.72s cubic-bezier(.18,.82,.24,1) both" : "knifeFloat 2.4s ease-in-out infinite",
+                  }}>
+                  <div style={{ animation:"knifeReveal 0.7s ease both" }}>
+                    <KnifePreview id={save.equipped} size={150} spin />
+                  </div>
+                </div>
+                <div style={{ fontSize:22, fontWeight:900, letterSpacing:"0.08em",
+                    position:"relative", animation:introLaunching ? "startTextOut 0.28s ease both" : "startTextIn 0.55s ease 0.32s both" }}>
+                  CLICK TO START
+                </div>
+              </button>
+              )}
             </div>
-            <GameCanvas equippedId={save.equipped} mapId={save.activeMap} onEnd={onGameEnd} onCoins={onAppleCoins} key={gameKey + save.activeMap} />
-            <div style={{ fontSize:10, color:C.textDim, fontFamily:"monospace" }}>
+            {(!gameStarted || introLaunching) && (
+              <style>{`
+                @keyframes startCardIn {
+                  from { opacity:0; transform:translateY(10px) scale(0.98); }
+                  to { opacity:1; transform:translateY(0) scale(1); }
+                }
+                @keyframes startCardLaunch {
+                  0% { opacity:1; transform:translateY(0) scale(1); }
+                  54% { opacity:0.94; transform:translateY(0) scale(1); }
+                  100% { opacity:0; transform:translateY(12px) scale(0.97); }
+                }
+                @keyframes knifeReveal {
+                  from { opacity:0; transform:translateY(18px) scale(0.88) rotate(-8deg); }
+                  to { opacity:1; transform:translateY(0) scale(1) rotate(0); }
+                }
+                @keyframes knifeFloat {
+                  0%, 100% { transform:translateY(0); }
+                  50% { transform:translateY(-9px); }
+                }
+                @keyframes knifeToLauncher {
+                  0% { transform:translateY(0) scale(1) rotate(0); opacity:1; }
+                  34% { transform:translateY(-28px) scale(1.08) rotate(10deg); opacity:1; }
+                  76% { transform:translateY(132px) scale(0.84) rotate(0); opacity:0.7; }
+                  100% { transform:translateY(154px) scale(0.78) rotate(0); opacity:0; }
+                }
+                @keyframes startGlowPulse {
+                  0%, 100% { opacity:0.72; transform:scale(1); }
+                  50% { opacity:1; transform:scale(1.04); }
+                }
+                @keyframes startGlowBurst {
+                  0% { opacity:0.8; transform:scale(1); }
+                  45% { opacity:1; transform:scale(1.12); }
+                  100% { opacity:0; transform:scale(1.32); }
+                }
+                @keyframes startTextIn {
+                  from { opacity:0; transform:translateY(8px); }
+                  to { opacity:1; transform:translateY(0); }
+                }
+                @keyframes startTextOut {
+                  from { opacity:1; transform:translateY(0); }
+                  to { opacity:0; transform:translateY(8px); }
+                }
+                @keyframes gamePopIn {
+                  from { opacity:0; transform:translateY(18px) scale(0.94); filter:brightness(1.35); }
+                  to { opacity:1; transform:translateY(0) scale(1); filter:brightness(1); }
+                }
+                @keyframes gameSceneReveal {
+                  0% { opacity:0; transform:translateY(96px) scale(0.86); filter:blur(3px) brightness(1.55); }
+                  48% { opacity:0.72; transform:translateY(-8px) scale(1.03); filter:blur(0.7px) brightness(1.18); }
+                  72% { opacity:1; transform:translateY(5px) scale(0.99); filter:blur(0) brightness(1.06); }
+                  100% { opacity:1; transform:translateY(0) scale(1); filter:blur(0) brightness(1); }
+                }
+              `}</style>
+            )}
+            <div style={{ display:gameStarted && !introLaunching ? "block" : "none", fontSize:10, color:C.textDim, fontFamily:"monospace" }}>
               CLICK · SPACE · TAP to throw &nbsp;·&nbsp; {activeMap.coinRate ?? 5} 🪙 PER HIT
-            </div>
-            <div style={{ display:"flex", gap:8 }}>
-              <button onClick={()=>setGameKey(k=>k+1)} style={BtnStyle()}>New Game</button>
-              <button onClick={()=>setScreen("maps")} style={BtnStyle(C.gold,C.goldDim)}>Change Map</button>
             </div>
           </div>
         )}
@@ -2179,7 +2463,7 @@ export default function App() {
               })}
             </div>
             <div style={{ marginTop:14, textAlign:"center" }}>
-              <button onClick={()=>setScreen("play")} style={BtnStyle(C.gold,C.goldDim)}>▶ Play Now</button>
+              <button onClick={()=>{ setGameStarted(false); setScreen("play"); }} style={BtnStyle(C.gold,C.goldDim)}>▶ Play Now</button>
             </div>
           </div>
         )}
@@ -2476,78 +2760,3 @@ export default function App() {
   );
 }
 
-// ─── HERO DISPLAY ─────────────────────────────────────────────────────────────
-// Animated lobby showpiece: spinning log with the equipped knife stuck in it.
-function HeroDisplay({ equippedKnife }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    const canvas = ref.current; if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width, H = canvas.height;
-    const CX = W/2, CY = H/2, R = 58;
-    let ang = 0, raf;
-    const t0 = Date.now();
-    // Fixed local angles for display knives
-    const displayAngles = [0, Math.PI*0.45, Math.PI*0.9, Math.PI*1.35, Math.PI*1.8];
-    function frame() {
-      ang += 0.008;
-      ctx.clearRect(0,0,W,H);
-      // Ambient glow
-      const glow = ctx.createRadialGradient(CX,CY,0,CX,CY,90);
-      glow.addColorStop(0, "rgba(200,155,60,0.08)");
-      glow.addColorStop(1, "transparent");
-      ctx.fillStyle = glow; ctx.fillRect(0,0,W,H);
-      // Log
-      ctx.save(); ctx.translate(CX,CY); ctx.rotate(ang);
-      ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.fillStyle="#4A2E14"; ctx.fill();
-      ctx.beginPath(); ctx.arc(0,0,R-3,0,Math.PI*2); ctx.fillStyle="#7A4E2A"; ctx.fill();
-      ["#8A5E38","#6A421E","#956434","#5C3818"].forEach((c,i)=>{
-        ctx.beginPath(); ctx.arc(1,1,(R-8)*(1-i*0.22),0,Math.PI*2);
-        ctx.strokeStyle=c; ctx.lineWidth=1.2; ctx.globalAlpha=0.65; ctx.stroke(); ctx.globalAlpha=1;
-      });
-      ctx.beginPath(); ctx.arc(0,0,6,0,Math.PI*2); ctx.fillStyle="#2A1008"; ctx.fill();
-      ctx.restore();
-      // Stuck knives — clipped so blade hides inside log, only handle shows outside
-      const t = Date.now()-t0;
-      displayAngles.forEach(local => {
-        const world = local + ang;
-        const tx = CX + Math.cos(world) * R;
-        const ty = CY + Math.sin(world) * R;
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(0, 0, W, H);
-        ctx.arc(CX, CY, R - 2, 0, Math.PI*2);
-        ctx.clip("evenodd");
-        equippedKnife.draw(ctx, tx, ty, world - Math.PI/2, t, 1.18);
-        ctx.restore();
-      });
-      raf = requestAnimationFrame(frame);
-    }
-    frame();
-    return () => cancelAnimationFrame(raf);
-  }, [equippedKnife.id]);
-  return <canvas ref={ref} width={200} height={200} style={{ display:"block", margin:"0 auto" }} />;
-}
-
-// ─── ACTION CARD ──────────────────────────────────────────────────────────────
-function ActionCard({ icon, label, sub, onClick, accent }) {
-  const [hover, setHover] = useState(false);
-  return (
-    <div onClick={onClick}
-      onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)}
-      style={{
-        border:`0.5px solid ${hover?accent:C.border}`,
-        borderRadius:8, padding:"12px 14px", cursor:"pointer",
-        background: hover ? accent+"0E" : C.surface,
-        transition:"border 0.15s, background 0.15s",
-        display:"flex", alignItems:"center", gap:10,
-      }}>
-      <span style={{ fontSize:22, minWidth:26 }}>{icon}</span>
-      <div>
-        <div style={{ fontWeight:700, fontSize:12, color:hover?accent:C.text,
-            fontFamily:"'Courier New',monospace", letterSpacing:"0.04em" }}>{label}</div>
-        <div style={{ fontSize:10, color:C.textDim, marginTop:2 }}>{sub}</div>
-      </div>
-    </div>
-  );
-}
