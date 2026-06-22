@@ -25,8 +25,8 @@ const RARITIES = {
   uncommon:  { label:"Uncommon",  color:"#4A9460", glow:"rgba(74,148,96,0.5)",  drop:0.250 },
   rare:      { label:"Rare",      color:"#3A7EC0", glow:"rgba(58,126,192,0.5)", drop:0.100 },
   epic:      { label:"Epic",      color:"#7B5FCC", glow:"rgba(123,95,204,0.5)", drop:0.040 },
-  legendary: { label:"Legendary", color:"#C89B3C", glow:"rgba(200,155,60,0.6)", drop:0.009 },
-  mythic:    { label:"Mythic",    color:"#CC4488", glow:"rgba(204,68,136,0.6)", drop:0.001 },
+  legendary: { label:"Legendary", color:"#C89B3C", glow:"rgba(200,155,60,0.6)", drop:0.001 },
+  mythic:    { label:"Mythic",    color:"#CC4488", glow:"rgba(204,68,136,0.6)", drop:0.009 },
 };
 
 // ─── KNIFE SKINS (15 designs, all original) ───────────────────────────────────
@@ -59,20 +59,20 @@ const KNIVES = [
   { id:"k_inferno",name:"Inferno Fang",   rarity:"epic",      cat:"Elemental",buyPrice:400,  value:160,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);const fl=Math.sin(t*0.008)*2;ctx.fillStyle="#C04420";ctx.beginPath();ctx.moveTo(0,-54+fl);ctx.lineTo(5,-20);ctx.lineTo(5,2);ctx.lineTo(-5,2);ctx.lineTo(-5,-20);ctx.closePath();ctx.fill();ctx.fillStyle="#E8901C";ctx.beginPath();ctx.moveTo(0,-50+fl);ctx.lineTo(3,-26);ctx.lineTo(-3,-26);ctx.closePath();ctx.fill();ctx.fillStyle="#601808";ctx.beginPath();ctx.roundRect(-4,2,8,22,3);ctx.fill();ctx.restore(); }},
   { id:"k_glacier",name:"Glacier Spike",  rarity:"epic",      cat:"Elemental",buyPrice:400,  value:160,
-    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#78AADC";ctx.beginPath();ctx.moveTo(0,-58);ctx.lineTo(4,-28);ctx.lineTo(6,-8);ctx.lineTo(-6,-8);ctx.lineTo(-4,-28);ctx.closePath();ctx.fill();ctx.strokeStyle=`rgba(180,220,255,${0.4+0.3*Math.sin(t*0.004)})`;ctx.lineWidth=2;[-46,-34,-22].forEach(yy=>{ctx.beginPath();ctx.moveTo(-5,yy);ctx.lineTo(5,yy+4);ctx.stroke();});ctx.fillStyle="#1A4080";ctx.beginPath();ctx.roundRect(-3,0,6,22,3);ctx.fill();ctx.restore(); }},
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#78AADC";ctx.beginPath();ctx.moveTo(0,-58);ctx.lineTo(4,-28);ctx.lineTo(6,-8);ctx.lineTo(-6,-8);ctx.lineTo(-4,-28);ctx.closePath();ctx.fill();ctx.strokeStyle=`rgba(180,220,255,${0.4+0.3*Math.sin(t*0.004)})`;ctx.lineWidth=2;[-46,-34,-22].forEach(yy=>{ctx.beginPath();ctx.moveTo(-5,yy);ctx.lineTo(5,yy+4);ctx.stroke();});ctx.fillStyle="#1A4080";ctx.beginPath();ctx.roundRect(-3,-8,6,30,3);ctx.fill();ctx.restore(); }},
 
   // ── GOLD / DIAMOND (2) ────────────────────────────────────────────────────
-  { id:"k_goldleaf",name:"Gold Leaf",     rarity:"legendary", cat:"Gold",     buyPrice:1200, value:480,
+  { id:"k_goldleaf",name:"Gold Leaf",     rarity:"mythic", cat:"Gold",     buyPrice:1200, value:480,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#C89B3C";ctx.beginPath();ctx.moveTo(0,-58);ctx.lineTo(4,-22);ctx.lineTo(4,2);ctx.lineTo(-4,2);ctx.lineTo(-4,-22);ctx.closePath();ctx.fill();const s=0.5+0.4*Math.sin(t*0.005);ctx.strokeStyle=`rgba(255,220,120,${s})`;ctx.lineWidth=2;[{x:-3,y:-46},{x:3,y:-32},{x:-3,y:-20}].forEach(p=>{ctx.beginPath();ctx.moveTo(p.x-3,p.y);ctx.lineTo(p.x+3,p.y+6);ctx.stroke();});ctx.fillStyle="#6A4A10";ctx.beginPath();ctx.roundRect(-4,2,8,9,2);ctx.fill();ctx.fillStyle="#C89B3C";ctx.beginPath();ctx.roundRect(-3,11,6,14,3);ctx.fill();ctx.restore(); }},
-  { id:"k_diamond", name:"Diamond Edge",  rarity:"legendary", cat:"Diamond",  buyPrice:1200, value:480,
+  { id:"k_diamond", name:"Diamond Edge",  rarity:"mythic", cat:"Diamond",  buyPrice:1200, value:480,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#78AADC";ctx.beginPath();ctx.moveTo(0,-60);ctx.lineTo(5,-30);ctx.lineTo(5,-4);ctx.lineTo(-5,-4);ctx.lineTo(-5,-30);ctx.closePath();ctx.fill();ctx.fillStyle="#D8EEFF";ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(3,-40);ctx.lineTo(0,-36);ctx.lineTo(-3,-40);ctx.closePath();ctx.fill();const s=`rgba(200,230,255,${0.5+0.4*Math.sin(t*0.006)})`;ctx.strokeStyle=s;ctx.lineWidth=1.5;[[-4,-24],[-4,-14]].forEach(([px,py])=>{ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(-px,py+4);ctx.stroke();});ctx.fillStyle="#0A3060";ctx.beginPath();ctx.roundRect(-3,-4,6,28,3);ctx.fill();ctx.restore(); }},
 
   // ── MYTHIC (3) ────────────────────────────────────────────────────────────
-  { id:"k_plasma",  name:"Plasma Shift",  rarity:"mythic",    cat:"Animated", buyPrice:3000, value:1200,
+  { id:"k_plasma",  name:"Plasma Shift",  rarity:"legendary",    cat:"Animated", buyPrice:3000, value:1200,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);const h=(t*0.25)%360;ctx.fillStyle=`hsl(${h},80%,52%)`;ctx.beginPath();ctx.moveTo(0,-58);ctx.lineTo(4,-22);ctx.lineTo(4,2);ctx.lineTo(-4,2);ctx.lineTo(-4,-22);ctx.closePath();ctx.fill();ctx.strokeStyle=`hsla(${(h+80)%360},90%,72%,0.7)`;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(0,0);ctx.stroke();ctx.fillStyle="#181818";ctx.beginPath();ctx.roundRect(-3,2,6,20,2);ctx.fill();ctx.restore(); }},
-  { id:"k_void",    name:"Void Reaper",   rarity:"mythic",    cat:"Animated", buyPrice:3000, value:1200,
+  { id:"k_void",    name:"Void Reaper",   rarity:"legendary",    cat:"Animated", buyPrice:3000, value:1200,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#0E0A1E";ctx.beginPath();ctx.moveTo(0,-60);ctx.lineTo(5,-26);ctx.lineTo(5,2);ctx.lineTo(-5,2);ctx.lineTo(-5,-26);ctx.closePath();ctx.fill();for(let i=0;i<6;i++){const py=-54+i*10,px=2.5*Math.sin(t*0.006+i*1.1);ctx.fillStyle=`rgba(160,140,240,${0.2+0.15*Math.sin(t*0.004+i)})`;ctx.beginPath();ctx.arc(px,py,1.8,0,Math.PI*2);ctx.fill();}ctx.strokeStyle=`rgba(140,120,220,${0.3+0.2*Math.sin(t*0.005)})`;ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(-5,0);ctx.lineTo(5,0);ctx.stroke();ctx.fillStyle="#1A1040";ctx.beginPath();ctx.roundRect(-3,2,6,20,3);ctx.fill();ctx.restore(); }},
-  { id:"k_sovereign",name:"The Sovereign",rarity:"mythic",   cat:"Limited",  buyPrice:3000, value:1200,
+  { id:"k_sovereign",name:"The Sovereign",rarity:"legendary",   cat:"Limited",  buyPrice:3000, value:1200,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#CC3366";ctx.beginPath();ctx.moveTo(0,-62);ctx.bezierCurveTo(6,-42,6,-20,5,2);ctx.lineTo(-5,2);ctx.bezierCurveTo(-6,-20,-6,-42,0,-62);ctx.fill();const s=0.5+0.4*Math.abs(Math.sin(t*0.005));ctx.strokeStyle=`rgba(255,180,210,${s})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,-58);ctx.lineTo(0,-2);ctx.stroke();ctx.fillStyle="#FFB0D0";ctx.beginPath();ctx.moveTo(-6,-28);ctx.lineTo(-12,-22);ctx.lineTo(-6,-16);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(6,-28);ctx.lineTo(12,-22);ctx.lineTo(6,-16);ctx.closePath();ctx.fill();ctx.fillStyle="#440E22";ctx.beginPath();ctx.roundRect(-3,2,6,20,3);ctx.fill();ctx.restore(); }},
 ];
 
@@ -82,9 +82,9 @@ const CRATES = [
   { id:"c_standard", name:"Standard Case",  price:75,  icon:"📦",
     weights:{ common:0.60, uncommon:0.30, rare:0.09, epic:0.01, legendary:0, mythic:0 }},
   { id:"c_pro",      name:"Pro Case",        price:200, icon:"🗃️",
-    weights:{ common:0.15, uncommon:0.28, rare:0.32, epic:0.18, legendary:0.065, mythic:0.005 }},
+    weights:{ common:0.15, uncommon:0.28, rare:0.32, epic:0.18, mythic:0.065, legendary:0.005 }},
   { id:"c_elite",    name:"Elite Vault",     price:600, icon:"🔮",
-    weights:{ common:0, uncommon:0.04, rare:0.15, epic:0.36, legendary:0.38, mythic:0.07 }},
+    weights:{ common:0, uncommon:0.04, rare:0.15, epic:0.36, mythic:0.38, legendary:0.07 }},
 ];
 
 // ─── MAPS / ARENAS ────────────────────────────────────────────────────────────
@@ -124,7 +124,7 @@ const MAPS = [
     }},
 
   // ── TIER 2 — Exhibition Hall ─────────────────────────────────────────────
-  { id:"hall", name:"Exhibition Hall", icon:"🏛️", unlockScore:15, speedMod:1.20, coinRate:2,
+  { id:"hall", name:"Exhibition Hall", icon:"🏛️", unlockScore:20, speedMod:1.20, coinRate:2,
     blurb:"Marble floors and velvet ropes. Crowds are starting to gather.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -160,7 +160,7 @@ const MAPS = [
     }},
 
   // ── TIER 3 — Neon District ────────────────────────────────────────────────
-  { id:"neon", name:"Neon District", icon:"🌆", unlockScore:35, speedMod:1.34, coinRate:3,
+  { id:"neon", name:"Neon District", icon:"🌆", unlockScore:40, speedMod:1.34, coinRate:3,
     blurb:"Rooftop throws under a buzzing skyline. Faster. Louder. Brighter.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -535,7 +535,7 @@ const MAPS = [
     }},
 
   // ── TIER 5 — Celestial Arena ─────────────────────────────────────────────
-  { id:"celestial", name:"Celestial Arena", icon:"🌌", unlockScore:100, speedMod:1.68, coinRate:5,
+  { id:"celestial", name:"Celestial Arena", icon:"🌌", unlockScore:80, speedMod:1.68, coinRate:5,
     blurb:"The final stage. Stars, gold, and a crowd that never blinks.",
     drawBackground(ctx,W,H,t,CX,CY){
       // Deep space gradient
@@ -631,15 +631,29 @@ const MAPS = [
         drawUFO(sweepX, bobY, scale, i*3.7);
       }
 
-      // Twin golden pillars with crystal tops
+      // Twin golden laser pylons
       for(let px of [10,W-22]){
         ctx.fillStyle="#3A2A10"; ctx.fillRect(px,H-240,14,240);
         ctx.fillStyle="#E8C878"; ctx.fillRect(px-3,H-244,20,5);
-        const crystalPulse=0.5+0.4*Math.sin(t*0.005+px);
-        ctx.fillStyle=`rgba(180,220,255,${crystalPulse})`;
-        ctx.beginPath(); ctx.moveTo(px+7,H-264); ctx.lineTo(px+13,H-246); ctx.lineTo(px+1,H-246); ctx.closePath(); ctx.fill();
-        const glow=ctx.createRadialGradient(px+7,H-255,0,px+7,H-255,30);
-        glow.addColorStop(0,`rgba(180,220,255,${crystalPulse*0.3})`); glow.addColorStop(1,"transparent");
+        const pulse=0.55+0.35*Math.sin(t*0.007+px);
+        const lx = px + 7;
+        const lensY = H - 251;
+        ctx.fillStyle="#102033";
+        ctx.beginPath(); ctx.roundRect(lx-9,lensY-8,18,13,3); ctx.fill();
+        ctx.strokeStyle="#E8C878"; ctx.lineWidth=1; ctx.stroke();
+        const lens = ctx.createRadialGradient(lx,lensY-2,0,lx,lensY-2,11);
+        lens.addColorStop(0,`rgba(235,252,255,${0.98*pulse})`);
+        lens.addColorStop(0.35,`rgba(96,210,255,${0.65*pulse})`);
+        lens.addColorStop(1,"rgba(35,100,170,0.06)");
+        ctx.fillStyle=lens;
+        ctx.beginPath(); ctx.ellipse(lx,lensY-2,8,5,0,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle=`rgba(120,220,255,${0.55+0.25*pulse})`; ctx.lineWidth=1; ctx.stroke();
+        ctx.strokeStyle=`rgba(95,210,255,${0.38*pulse})`;
+        ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(lx-5,lensY-13); ctx.lineTo(lx+5,lensY-13); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(lx-4,lensY+8); ctx.lineTo(lx+4,lensY+8); ctx.stroke();
+        const glow=ctx.createRadialGradient(lx,lensY,0,lx,lensY,34);
+        glow.addColorStop(0,`rgba(130,220,255,${0.44*pulse})`); glow.addColorStop(1,"transparent");
         ctx.fillStyle=glow; ctx.fillRect(0,0,W,H);
       }
       // Crowd of distant silhouettes (the "audience that never blinks")
@@ -664,11 +678,11 @@ const MAPS = [
 
 // ─── LEADERBOARD SEED ────────────────────────────────────────────────────────
 const SEED_BOARD = [
-  { name:"PHANTOM",  score:9840 },
-  { name:"SLAYER",   score:7320 },
-  { name:"REAPER",   score:5510 },
-  { name:"VORTEX",   score:3880 },
-  { name:"ECLIPSE",  score:2640 },
+  { name:"PHANTOM",  score:146 },
+  { name:"SLAYER",   score:128 },
+  { name:"REAPER",   score:111 },
+  { name:"VORTEX",   score:94 },
+  { name:"ECLIPSE",  score:76 },
 ];
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -742,7 +756,7 @@ function Badge({ rarity, tiny }) {
 }
 
 // ─── KNIFE CANVAS PREVIEW ─────────────────────────────────────────────────────
-function KnifePreview({ id, size = 60, spin = false }) {
+function KnifePreview({ id, size = 60, spin = false, scale = 1 }) {
   const ref = useRef(null), raf = useRef(null), t0 = useRef(Date.now()), aRef = useRef(0);
   const knife = KNIVES.find(k => k.id === id);
   useEffect(() => {
@@ -753,13 +767,70 @@ function KnifePreview({ id, size = 60, spin = false }) {
     function frame() {
       ctx.clearRect(0, 0, W, H);
       if (spin) aRef.current += 0.06;
-      knife.draw(ctx, W / 2, H / 2 + 12, aRef.current, Date.now() - t0.current);
+      knife.draw(ctx, W / 2, H / 2 + 12, aRef.current, Date.now() - t0.current, scale);
       if (animating) raf.current = requestAnimationFrame(frame);
     }
     frame();
     return () => { if (raf.current) cancelAnimationFrame(raf.current); };
-  }, [id, spin]);
+  }, [id, spin, scale]);
   return <canvas ref={ref} width={size} height={size + 24} style={{ display: "block" }} />;
+}
+
+function drawEarthTarget(ctx, r) {
+  const ocean = ctx.createRadialGradient(-34,-40,8,0,0,r);
+  ocean.addColorStop(0,"#49C8F4");
+  ocean.addColorStop(0.42,"#03AEE0");
+  ocean.addColorStop(0.72,"#0878C8");
+  ocean.addColorStop(1,"#06315F");
+
+  ctx.beginPath(); ctx.arc(0,0,r+4,0,Math.PI*2); ctx.fillStyle="#064FBA"; ctx.fill();
+  ctx.beginPath(); ctx.arc(0,0,r-3,0,Math.PI*2); ctx.fillStyle=ocean; ctx.fill();
+
+  ctx.save();
+  ctx.beginPath(); ctx.arc(0,0,r-5,0,Math.PI*2); ctx.clip();
+
+  function land(points, fill) {
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.moveTo(points[0][0], points[0][1]);
+    for (let i=1;i<points.length;i++) ctx.lineTo(points[i][0], points[i][1]);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  land([[-84,-30],[-65,-55],[-36,-54],[-18,-35],[-30,-12],[-58,-7],[-76,-15]], "#8CCB48");
+  land([[-52,-4],[-24,-6],[-10,16],[-19,43],[-37,77],[-58,60],[-65,28]], "#7FC23A");
+  land([[20,-34],[47,-47],[78,-35],[86,-12],[61,2],[36,-8]], "#8BCB42");
+  land([[38,20],[74,12],[93,34],[80,62],[51,55],[27,38]], "#91D24B");
+  land([[-8,-72],[22,-67],[34,-51],[6,-46],[-20,-55]], "#9AD95B");
+
+  land([[-76,-24],[-60,-42],[-38,-40],[-24,-28],[-42,-22],[-62,-13]], "#B6E477");
+  land([[-43,6],[-24,9],[-24,30],[-39,53],[-53,41],[-56,20]], "#AEE06A");
+  land([[45,-27],[65,-30],[72,-14],[56,-8],[42,-14]], "#B5E66A");
+  land([[48,28],[75,28],[72,45],[54,47]], "#B8E36E");
+
+  ctx.fillStyle="rgba(255,255,255,0.18)";
+  [[-48,-62,34,7],[22,-20,46,8],[-18,56,54,9]].forEach(([x,y,w,h])=>{
+    ctx.beginPath(); ctx.ellipse(x,y,w,h,-0.18,0,Math.PI*2); ctx.fill();
+  });
+
+  ctx.restore();
+
+  const shade = ctx.createRadialGradient(28,30,10,34,36,r*1.12);
+  shade.addColorStop(0,"rgba(0,0,0,0)");
+  shade.addColorStop(0.58,"rgba(0,0,0,0.05)");
+  shade.addColorStop(1,"rgba(0,18,50,0.34)");
+  ctx.fillStyle=shade; ctx.beginPath(); ctx.arc(0,0,r-3,0,Math.PI*2); ctx.fill();
+
+  const shine = ctx.createRadialGradient(-45,-48,0,-45,-48,86);
+  shine.addColorStop(0,"rgba(255,255,255,0.38)");
+  shine.addColorStop(0.45,"rgba(255,255,255,0.10)");
+  shine.addColorStop(1,"rgba(255,255,255,0)");
+  ctx.fillStyle=shine; ctx.beginPath(); ctx.arc(0,0,r-4,0,Math.PI*2); ctx.fill();
+
+  ctx.strokeStyle="rgba(33,129,238,0.95)"; ctx.lineWidth=3.5; ctx.beginPath(); ctx.arc(0,0,r-6,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle="rgba(185,238,255,0.42)"; ctx.lineWidth=1.2; ctx.beginPath(); ctx.arc(0,0,r-14,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,8,0,Math.PI*2); ctx.fillStyle="#061225"; ctx.fill();
 }
 
 function StartScenePreview({ equippedId, mapId }) {
@@ -775,14 +846,36 @@ function StartScenePreview({ equippedId, mapId }) {
 
     function drawPreviewLog(ang) {
       ctx.save(); ctx.translate(CX, LOG_CY); ctx.rotate(ang);
-      ctx.beginPath(); ctx.arc(0,0,LOG_R,0,Math.PI*2); ctx.fillStyle="#4A2E14"; ctx.fill();
-      ctx.beginPath(); ctx.arc(0,0,LOG_R-4,0,Math.PI*2); ctx.fillStyle="#8A5A2D"; ctx.fill();
-      ["#9A6A38","#7A4E2A","#A8743D","#6A421E"].forEach((c,i)=>{
-        ctx.beginPath(); ctx.arc(2,1,(LOG_R-10)*(1-i*0.17),0,Math.PI*2);
-        ctx.strokeStyle=c; ctx.lineWidth=1.4; ctx.globalAlpha=0.7; ctx.stroke(); ctx.globalAlpha=1;
+      if (map.id === "celestial") {
+        drawEarthTarget(ctx, LOG_R);
+        ctx.restore();
+        return;
+      }
+      const hallWood = map.id === "hall";
+      const neonWood = map.id === "neon";
+      const forgeWood = map.id === "forge";
+      const body = ctx.createRadialGradient(-24,-28,10,0,0,LOG_R);
+      body.addColorStop(0,hallWood ? "#9A9488" : neonWood ? "#5A3D72" : forgeWood ? "#7E4D28" : "#9A6436");
+      body.addColorStop(0.55,hallWood ? "#6F685E" : neonWood ? "#3A2453" : forgeWood ? "#563018" : "#70411F");
+      body.addColorStop(1,hallWood ? "#37322D" : neonWood ? "#1A1028" : forgeWood ? "#271006" : "#3C210F");
+      ctx.beginPath(); ctx.arc(0,0,LOG_R+2,0,Math.PI*2); ctx.fillStyle=hallWood ? "#252321" : neonWood ? "#11091C" : forgeWood ? "#1D0A03" : "#2C170B"; ctx.fill();
+      ctx.beginPath(); ctx.arc(0,0,LOG_R-3,0,Math.PI*2); ctx.fillStyle=body; ctx.fill();
+      ctx.strokeStyle=hallWood ? "#B8B0A0" : neonWood ? "#8F5FC0" : "#C49A48"; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(0,0,LOG_R-7,0,Math.PI*2); ctx.stroke();
+      ctx.strokeStyle=hallWood ? "rgba(245,240,225,0.22)" : neonWood ? "rgba(210,150,255,0.2)" : "rgba(255,226,145,0.24)"; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(0,0,LOG_R-13,0,Math.PI*2); ctx.stroke();
+      [76,58,40,22].forEach((r,i)=>{
+        ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2);
+        ctx.strokeStyle = hallWood
+          ? (i % 2 ? "rgba(34,32,30,0.48)" : "rgba(210,205,190,0.32)")
+          : neonWood
+            ? (i % 2 ? "rgba(18,10,28,0.55)" : "rgba(170,100,220,0.34)")
+          : forgeWood
+            ? (i % 2 ? "rgba(36,13,4,0.5)" : "rgba(205,120,54,0.34)")
+          : (i % 2 ? "rgba(42,20,8,0.48)" : "rgba(210,155,70,0.38)");
+        ctx.lineWidth = i === 0 ? 2 : 1.3;
+        ctx.stroke();
       });
-      for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;ctx.beginPath();ctx.moveTo(Math.cos(a)*10,Math.sin(a)*10);ctx.lineTo(Math.cos(a)*(LOG_R-5),Math.sin(a)*(LOG_R-5));ctx.strokeStyle="rgba(40,18,4,0.22)";ctx.lineWidth=0.8;ctx.stroke();}
-      ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fillStyle="#2A1008"; ctx.fill();
+      ctx.beginPath(); ctx.arc(0,0,8,0,Math.PI*2); ctx.fillStyle=hallWood ? "#211E1B" : neonWood ? "#09030F" : "#1F0B04"; ctx.fill();
+      ctx.strokeStyle=hallWood ? "rgba(205,200,185,0.58)" : neonWood ? "rgba(175,105,225,0.58)" : "rgba(196,154,72,0.65)"; ctx.lineWidth=1; ctx.stroke();
       ctx.restore();
     }
 
@@ -966,14 +1059,36 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
       if (gs.phase === "breaking") return;
       const fall = getFallingLogTransform();
       ctx.save(); ctx.translate(fall.x, fall.y); ctx.rotate(gs.ang + fall.rot);
-      ctx.beginPath(); ctx.arc(0,0,LOG_R,0,Math.PI*2); ctx.fillStyle="#4A2E14"; ctx.fill();
-      ctx.beginPath(); ctx.arc(0,0,LOG_R-4,0,Math.PI*2); ctx.fillStyle="#7A4E2A"; ctx.fill();
-      ["#8A5E38","#6A421E","#956434","#5C3818","#9E6C42"].forEach((c,i)=>{
-        ctx.beginPath(); ctx.arc(2,1,(LOG_R-10)*(1-i*0.17),0,Math.PI*2);
-        ctx.strokeStyle=c; ctx.lineWidth=1.4; ctx.globalAlpha=0.7; ctx.stroke(); ctx.globalAlpha=1;
+      if (map.id === "celestial") {
+        drawEarthTarget(ctx, LOG_R);
+        ctx.restore();
+        return;
+      }
+      const hallWood = map.id === "hall";
+      const neonWood = map.id === "neon";
+      const forgeWood = map.id === "forge";
+      const body = ctx.createRadialGradient(-24,-28,10,0,0,LOG_R);
+      body.addColorStop(0,hallWood ? "#9A9488" : neonWood ? "#5A3D72" : forgeWood ? "#7E4D28" : "#9A6436");
+      body.addColorStop(0.55,hallWood ? "#6F685E" : neonWood ? "#3A2453" : forgeWood ? "#563018" : "#70411F");
+      body.addColorStop(1,hallWood ? "#37322D" : neonWood ? "#1A1028" : forgeWood ? "#271006" : "#3C210F");
+      ctx.beginPath(); ctx.arc(0,0,LOG_R+2,0,Math.PI*2); ctx.fillStyle=hallWood ? "#252321" : neonWood ? "#11091C" : forgeWood ? "#1D0A03" : "#2C170B"; ctx.fill();
+      ctx.beginPath(); ctx.arc(0,0,LOG_R-3,0,Math.PI*2); ctx.fillStyle=body; ctx.fill();
+      ctx.strokeStyle=hallWood ? "#B8B0A0" : neonWood ? "#8F5FC0" : "#C49A48"; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(0,0,LOG_R-7,0,Math.PI*2); ctx.stroke();
+      ctx.strokeStyle=hallWood ? "rgba(245,240,225,0.22)" : neonWood ? "rgba(210,150,255,0.2)" : "rgba(255,226,145,0.24)"; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(0,0,LOG_R-13,0,Math.PI*2); ctx.stroke();
+      [76,58,40,22].forEach((r,i)=>{
+        ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2);
+        ctx.strokeStyle = hallWood
+          ? (i % 2 ? "rgba(34,32,30,0.48)" : "rgba(210,205,190,0.32)")
+          : neonWood
+            ? (i % 2 ? "rgba(18,10,28,0.55)" : "rgba(170,100,220,0.34)")
+          : forgeWood
+            ? (i % 2 ? "rgba(36,13,4,0.5)" : "rgba(205,120,54,0.34)")
+          : (i % 2 ? "rgba(42,20,8,0.48)" : "rgba(210,155,70,0.38)");
+        ctx.lineWidth = i === 0 ? 2 : 1.3;
+        ctx.stroke();
       });
-      for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;ctx.beginPath();ctx.moveTo(Math.cos(a)*10,Math.sin(a)*10);ctx.lineTo(Math.cos(a)*(LOG_R-5),Math.sin(a)*(LOG_R-5));ctx.strokeStyle="rgba(40,18,4,0.22)";ctx.lineWidth=0.8;ctx.stroke();}
-      ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fillStyle="#2A1008"; ctx.fill();
+      ctx.beginPath(); ctx.arc(0,0,8,0,Math.PI*2); ctx.fillStyle=hallWood ? "#211E1B" : neonWood ? "#09030F" : "#1F0B04"; ctx.fill();
+      ctx.strokeStyle=hallWood ? "rgba(205,200,185,0.58)" : neonWood ? "rgba(175,105,225,0.58)" : "rgba(196,154,72,0.65)"; ctx.lineWidth=1; ctx.stroke();
       ctx.restore();
 
       // ── DIRECTIONAL IMPACT FLASH ──────────────────────────────────────
@@ -1410,16 +1525,19 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
 
     function drawHUD() {
       ctx.fillStyle = "rgba(0,0,0,0.56)"; ctx.beginPath(); ctx.roundRect(8,31,W-16,23,4); ctx.fill();
-      ctx.font = "bold 12px 'Courier New', monospace"; ctx.fillStyle = "#C89B3C";
+      ctx.font = "900 13px 'Courier New', monospace";
+      ctx.shadowColor = "rgba(200,155,60,0.35)";
+      ctx.shadowBlur = 3;
+      ctx.fillStyle = "#D3A744";
       ctx.textAlign = "left";  ctx.fillText(`SCORE ${gs.score}`, 16, 47);
       const iconGap = 11;
       const startX = CX - ((gs.left - 1) * iconGap) / 2;
       for (let i = 0; i < gs.left; i++) {
         const x = startX + i * iconGap;
         ctx.save();
-        ctx.translate(x, 45);
+        ctx.translate(x, 41);
         ctx.rotate(-0.12);
-        ctx.scale(0.45, 0.45);
+        ctx.scale(0.42, 0.42);
         ctx.fillStyle = "#B9B9B9";
         ctx.beginPath();
         ctx.moveTo(0, -18);
@@ -1443,8 +1561,9 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
         ctx.stroke();
         ctx.restore();
       }
-      ctx.textAlign = "right"; ctx.fillStyle = "#8A8680";
+      ctx.textAlign = "right"; ctx.fillStyle = "#A29E96";
       ctx.fillText(`LV ${gs.level}`, W-16, 47);
+      ctx.shadowBlur = 0;
     }
 
     function drawBg(t) {
@@ -2028,7 +2147,7 @@ export default function App() {
   const [inspecting, setInspecting] = useState(null);
   const [openCase, setOpenCase]   = useState(null);
   const [toast, setToast]         = useState(null);
-  const [catFilter, setCatFilter] = useState("All");
+  const [rarityFilter, setRarityFilter] = useState("all");
   const [gameKey, setGameKey]     = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [introLaunching, setIntroLaunching] = useState(false);
@@ -2152,6 +2271,9 @@ export default function App() {
     if (!m) return;
     if (save.stats.score < m.unlockScore) { toast$("Arena locked"); return; }
     upd(p => { p.activeMap = id; return p; });
+    setGameStarted(false);
+    setIntroLaunching(false);
+    setScreen("play");
     snd.menu(); toast$(`${m.name} selected!`, true);
   }
 
@@ -2163,7 +2285,7 @@ export default function App() {
 
   const equippedKnife = KNIVES.find(k => k.id === save.equipped) || KNIVES[0];
   const activeMap = MAPS.find(m => m.id === save.activeMap) || MAPS[0];
-  const cats = ["All", ...new Set(KNIVES.map(k=>k.cat))];
+  const rarityFilters = ["all","common","uncommon","rare","epic","mythic","legendary"];
 
   // Leaderboard: merge seed + player if score > 0
   const board = [...SEED_BOARD];
@@ -2181,20 +2303,20 @@ export default function App() {
     ? board.findIndex(entry => entry.isMe) + 1
     : null;
   const unlockedMaps = MAPS.filter(m => save.stats.score >= m.unlockScore).length;
-  const rarityOrder = ["common","uncommon","rare","epic","legendary","mythic"];
+  const rarityOrder = ["common","uncommon","rare","epic","mythic","legendary"];
   const rarestOwned = ownedKnives.slice().sort(
     (a,b) => rarityOrder.indexOf(b.rarity) - rarityOrder.indexOf(a.rarity)
   )[0] || equippedKnife;
 
   const NAV = [
-    { id:"stats",     label:"Stats",    icon:"▦" },
-    { id:"play",      label:"Play",     icon:"▶" },
-    { id:"maps",      label:"Maps",     icon:"🗺" },
-    { id:"inventory", label:"Knives",   icon:"⚔" },
-    { id:"shop",      label:"Shop",     icon:"🏪" },
-    { id:"cases",     label:"Cases",    icon:"📦" },
+    { id:"play",      label:"Play",     icon:"🎮" },
+    { id:"maps",      label:"Maps",     icon:"🗺️" },
+    { id:"inventory", label:"Knives",   icon:"🗡️" },
+    { id:"shop",      label:"Shop",     icon:"🛒" },
+    { id:"cases",     label:"Cases",    icon:"🎁" },
     { id:"board",     label:"Scores",   icon:"🏆" },
-    { id:"settings",  label:"Settings", icon:"⚙" },
+    { id:"stats",     label:"Stats",    icon:"📊" },
+    { id:"settings",  label:"Settings", icon:"⚙️" },
   ];
 
   return (
@@ -2433,7 +2555,7 @@ export default function App() {
                     animation:introLaunching ? "knifeToLauncher 0.84s cubic-bezier(.18,.82,.24,1) both" : "knifeFloat 2.4s ease-in-out infinite",
                   }}>
                   <div style={{ animation:"knifeReveal 0.7s ease both" }}>
-                    <KnifePreview id={save.equipped} size={150} spin />
+                    <KnifePreview id={save.equipped} size={150} spin scale={1.18} />
                   </div>
                 </div>
                 <div style={{ fontSize:22, fontWeight:900, letterSpacing:"0.08em",
@@ -2498,7 +2620,7 @@ export default function App() {
                 }
               `}</style>
             )}
-            <div style={{ display:gameStarted && !introLaunching ? "block" : "none", fontSize:10, color:C.textDim, fontFamily:"monospace" }}>
+            <div style={{ display:gameStarted && !introLaunching ? "block" : "none", marginTop:-22, fontSize:10, color:C.textDim, fontFamily:"monospace" }}>
               CLICK · SPACE · TAP to throw &nbsp;·&nbsp; {activeMap.coinRate ?? 5} 🪙 PER HIT
             </div>
           </div>
@@ -2554,9 +2676,6 @@ export default function App() {
                 );
               })}
             </div>
-            <div style={{ marginTop:14, textAlign:"center" }}>
-              <button onClick={()=>{ setGameStarted(false); setScreen("play"); }} style={BtnStyle(C.gold,C.goldDim)}>▶ Play Now</button>
-            </div>
           </div>
         )}
 
@@ -2565,13 +2684,13 @@ export default function App() {
           <div>
             <SectionHead>YOUR COLLECTION — {save.inventory.length}/{KNIVES.length} KNIVES</SectionHead>
             <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:12 }}>
-              {cats.map(c=>(
-                <button key={c} onClick={()=>setCatFilter(c)} style={{
+              {rarityFilters.map(c=>(
+                <button key={c} onClick={()=>setRarityFilter(c)} style={{
                     padding:"3px 10px", borderRadius:4, fontSize:10, fontWeight:700, cursor:"pointer",
                     fontFamily:"monospace", letterSpacing:"0.05em",
-                    background: catFilter===c ? C.gold+"22" : "transparent",
-                    border:`0.5px solid ${catFilter===c?C.gold:C.border}`,
-                    color: catFilter===c ? C.gold : C.textDim,
+                    background: rarityFilter===c ? C.gold+"22" : "transparent",
+                    border:`0.5px solid ${rarityFilter===c?C.gold:C.border}`,
+                    color: rarityFilter===c ? C.gold : C.textDim,
                 }}>{c.toUpperCase()}</button>
               ))}
             </div>
@@ -2582,7 +2701,7 @@ export default function App() {
             )}
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(100px,1fr))", gap:8 }}>
               {KNIVES.filter(k=> save.inventory.includes(k.id) &&
-                (catFilter==="All"||k.cat===catFilter)).map(k=>(
+                (rarityFilter==="all"||k.rarity===rarityFilter)).map(k=>(
                 <div key={k.id} style={{
                     border:`0.5px solid ${save.equipped===k.id?RARITIES[k.rarity].color:C.border}`,
                     borderRadius:8, padding:"10px 8px", background:C.surface,
@@ -2602,11 +2721,6 @@ export default function App() {
                         border:`0.5px solid ${save.equipped===k.id?C.gold:C.border}`,
                         color: save.equipped===k.id ? C.gold : C.textDim,
                     }}>{save.equipped===k.id?"EQUIPPED":"EQUIP"}</button>
-                    <button onClick={()=>setInspecting(k)} style={{
-                        padding:"4px 6px", fontSize:9, borderRadius:3, cursor:"pointer",
-                        background:"transparent", border:`0.5px solid ${C.border}`,
-                        color:C.textDim, fontFamily:"monospace",
-                    }}>👁</button>
                   </div>
                 </div>
               ))}
@@ -2619,18 +2733,18 @@ export default function App() {
           <div>
             <SectionHead>KNIFE SHOP — BALANCE: 🪙 {save.coins}</SectionHead>
             <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:12 }}>
-              {cats.map(c=>(
-                <button key={c} onClick={()=>setCatFilter(c)} style={{
+              {rarityFilters.map(c=>(
+                <button key={c} onClick={()=>setRarityFilter(c)} style={{
                     padding:"3px 10px", borderRadius:4, fontSize:10, fontWeight:700, cursor:"pointer",
                     fontFamily:"monospace", letterSpacing:"0.05em",
-                    background: catFilter===c ? C.gold+"22" : "transparent",
-                    border:`0.5px solid ${catFilter===c?C.gold:C.border}`,
-                    color: catFilter===c ? C.gold : C.textDim,
+                    background: rarityFilter===c ? C.gold+"22" : "transparent",
+                    border:`0.5px solid ${rarityFilter===c?C.gold:C.border}`,
+                    color: rarityFilter===c ? C.gold : C.textDim,
                 }}>{c.toUpperCase()}</button>
               ))}
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(100px,1fr))", gap:8 }}>
-              {KNIVES.filter(k=> catFilter==="All"||k.cat===catFilter).map(k=>{
+              {KNIVES.filter(k=> rarityFilter==="all"||k.rarity===rarityFilter).map(k=>{
                 const owned = save.inventory.includes(k.id);
                 const canBuy = !owned && save.coins >= k.buyPrice;
                 return (
@@ -2647,18 +2761,13 @@ export default function App() {
                     <div style={{ textAlign:"center", marginBottom:4 }}><Badge rarity={k.rarity} tiny /></div>
                     <div style={{ textAlign:"center", fontSize:10, color:C.gold,
                         fontFamily:"monospace", marginBottom:6, fontWeight:700 }}>🪙 {k.buyPrice}</div>
-                    <button onClick={()=>{ if(!owned){setInspecting(k);} }} style={{
-                        width:"100%", marginBottom:4, padding:"3px 0", fontSize:9, borderRadius:3,
-                        cursor:"pointer", fontFamily:"monospace", fontWeight:700,
-                        background:"transparent", border:`0.5px solid ${C.border}`, color:C.textDim,
-                    }}>INSPECT 👁</button>
                     <button onClick={()=>buyKnife(k)} disabled={owned||!canBuy} style={{
                         width:"100%", padding:"4px 0", fontSize:9, borderRadius:3, fontWeight:700,
                         fontFamily:"monospace", cursor:owned?"default":canBuy?"pointer":"not-allowed",
                         background: owned?"transparent":canBuy?C.green+"22":"transparent",
                         border:`0.5px solid ${owned?C.border:canBuy?C.green:C.border}`,
                         color: owned?C.textDim:canBuy?"#88DDAA":C.textDim,
-                    }}>{owned?"OWNED":canBuy?"BUY":"LOW 🪙"}</button>
+                    }}>{owned?"OWNED":canBuy?"BUY":"NOT ENOUGH 🪙"}</button>
                   </div>
                 );
               })}
@@ -2808,7 +2917,7 @@ export default function App() {
                   borderBottom:`0.5px solid ${C.border}` }}>
                 {["#","PLAYER","SCORE"].map(h=>(
                   <span key={h} style={{ fontSize:9, color:C.textDim, fontFamily:"monospace",
-                      fontWeight:700, letterSpacing:"0.08em" }}>{h}</span>
+                      fontWeight:700, letterSpacing:"0.08em", textAlign:h==="SCORE"?"center":"left" }}>{h}</span>
                 ))}
               </div>
               {board.slice(0,10).map((entry, i) => {
@@ -2831,7 +2940,7 @@ export default function App() {
                       {entry.name}{isMe?" (YOU)":""}
                     </span>
                     <span style={{ fontFamily:"'Courier New',monospace", fontSize:12,
-                        color:C.textMid, fontWeight:700, textAlign:"right" }}>
+                        color:C.textMid, fontWeight:700, textAlign:"center" }}>
                       {entry.score.toLocaleString()}
                     </span>
                   </div>
