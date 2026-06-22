@@ -79,11 +79,11 @@ const KNIVES = [
 
 // ─── CRATES ───────────────────────────────────────────────────────────────────
 const CRATES = [
-  { id:"c_standard", name:"Standard Case",  price:75,  icon:"📦",
+  { id:"c_standard", name:"Standard Case",  price:100,  icon:"📦",
     weights:{ common:0.60, uncommon:0.30, rare:0.09, epic:0.01, legendary:0, mythic:0 }},
-  { id:"c_pro",      name:"Pro Case",        price:200, icon:"🗃️",
+  { id:"c_pro",      name:"Pro Case",        price:300, icon:"🗃️",
     weights:{ common:0.15, uncommon:0.28, rare:0.32, epic:0.18, mythic:0.065, legendary:0.005 }},
-  { id:"c_elite",    name:"Elite Vault",     price:600, icon:"🔮",
+  { id:"c_elite",    name:"Elite Case",     price:700, icon:"🔮",
     weights:{ common:0, uncommon:0.04, rare:0.15, epic:0.36, mythic:0.38, legendary:0.07 }},
 ];
 
@@ -93,7 +93,7 @@ const CRATES = [
 // Difficulty and visual complexity both climb with tier.
 const MAPS = [
   // ── TIER 1 — Practice Yard ──────────────────────────────────────────────
-  { id:"yard", name:"Practice Yard", icon:"🪵", unlockScore:0, speedMod:1.08, coinRate:1,
+  { id:"yard", name:"Practice Yard", icon:"🪵", unlockScore:0, speedMod:1.08, levelReward:2,
     blurb:"Where every thrower starts. Plain, calm, forgiving.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -124,7 +124,7 @@ const MAPS = [
     }},
 
   // ── TIER 2 — Exhibition Hall ─────────────────────────────────────────────
-  { id:"hall", name:"Exhibition Hall", icon:"🏛️", unlockScore:20, speedMod:1.20, coinRate:2,
+  { id:"hall", name:"Exhibition Hall", icon:"🏛️", unlockScore:20, speedMod:1.20, levelReward:4,
     blurb:"Marble floors and velvet ropes. Crowds are starting to gather.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -142,11 +142,33 @@ const MAPS = [
         ctx.fillStyle="#A8A290"; ctx.fillRect(px-4,H-234,24,8); ctx.fillRect(px-4,H-52,24,8);
         for(let yy=H-220;yy<H-60;yy+=14){ ctx.strokeStyle="#B8B2A0"; ctx.lineWidth=0.6; ctx.beginPath(); ctx.moveTo(px,yy); ctx.lineTo(px+16,yy); ctx.stroke(); }
       }
+      // Small flickering flames on the column caps
+      for(let fx of [24,W-20]){
+        const fy=H-244;
+        const pulse=0.72+0.28*Math.abs(Math.sin(t*0.012+fx));
+        const glow=ctx.createRadialGradient(fx,fy+2,0,fx,fy+2,30);
+        glow.addColorStop(0,`rgba(255,160,60,${0.22*pulse})`);
+        glow.addColorStop(0.55,`rgba(255,80,30,${0.08*pulse})`);
+        glow.addColorStop(1,"rgba(255,80,30,0)");
+        ctx.fillStyle=glow; ctx.fillRect(fx-34,fy-30,68,60);
+        ctx.fillStyle=`rgba(255,95,28,${0.82+0.12*pulse})`;
+        ctx.beginPath();
+        ctx.moveTo(fx-6,fy+8);
+        ctx.quadraticCurveTo(fx-10,fy-5,fx,fy-18-4*pulse);
+        ctx.quadraticCurveTo(fx+10,fy-4,fx+6,fy+8);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle=`rgba(255,220,95,${0.86+0.1*pulse})`;
+        ctx.beginPath();
+        ctx.moveTo(fx-3,fy+7);
+        ctx.quadraticCurveTo(fx-5,fy-3,fx+1,fy-12-3*pulse);
+        ctx.quadraticCurveTo(fx+5,fy-2,fx+3,fy+7);
+        ctx.closePath(); ctx.fill();
+      }
       // Velvet rope swag
       ctx.strokeStyle="#7A1818"; ctx.lineWidth=2.5;
-      ctx.beginPath(); ctx.moveTo(36,H-60); ctx.bezierCurveTo(CX,H-76,CX,H-76,W-44,H-60); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(24,H-72); ctx.bezierCurveTo(CX,H-86,CX,H-86,W-20,H-72); ctx.stroke();
       ctx.fillStyle="#5A1010";
-      [36,W-44].forEach(px=>{ctx.beginPath();ctx.arc(px,H-64,5,0,Math.PI*2);ctx.fill();});
+      [24,W-20].forEach(px=>{ctx.beginPath();ctx.arc(px,H-76,5,0,Math.PI*2);ctx.fill();});
       // Spotlights
       [[CX*0.5,"rgba(255,240,210,0.07)"],[CX,"rgba(200,210,255,0.06)"],[CX*1.5,"rgba(255,240,210,0.07)"]].forEach(([sx,col])=>{
         const sp=ctx.createRadialGradient(sx,0,0,sx,0,160);
@@ -160,7 +182,7 @@ const MAPS = [
     }},
 
   // ── TIER 3 — Neon District ────────────────────────────────────────────────
-  { id:"neon", name:"Neon District", icon:"🌆", unlockScore:40, speedMod:1.34, coinRate:3,
+  { id:"neon", name:"Neon District", icon:"🌆", unlockScore:40, speedMod:1.34, levelReward:6,
     blurb:"Rooftop throws under a buzzing skyline. Faster. Louder. Brighter.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -312,7 +334,7 @@ const MAPS = [
     }},
 
   // ── TIER 4 — Volcanic Forge ───────────────────────────────────────────────
-  { id:"forge", name:"Volcanic Forge", icon:"🌋", unlockScore:60, speedMod:1.50, coinRate:4,
+  { id:"forge", name:"Volcanic Forge", icon:"🌋", unlockScore:60, speedMod:1.50, levelReward:8,
     blurb:"Molten light, hammering heat. Only steady hands survive here.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -535,7 +557,7 @@ const MAPS = [
     }},
 
   // ── TIER 5 — Celestial Arena ─────────────────────────────────────────────
-  { id:"celestial", name:"Celestial Arena", icon:"🌌", unlockScore:80, speedMod:1.68, coinRate:5,
+  { id:"celestial", name:"Celestial Arena", icon:"🌌", unlockScore:80, speedMod:1.68, levelReward:10,
     blurb:"The final stage. Stars, gold, and a crowd that never blinks.",
     drawBackground(ctx,W,H,t,CX,CY){
       // Deep space gradient
@@ -737,6 +759,7 @@ function useSound() {
     hit:    () => { tone(320, "square",   0.18, 0.18); },
     fail:   () => { tone(120, "sawtooth", 0.45, 0.20); },
     coin:   () => { tone(1100,"sine",     0.14, 0.10); setTimeout(()=>tone(1500,"sine",0.1,0.08),60); },
+    caseTick: () => { tone(980,"square",0.035,0.035); },
     open:   () => { tone(260,"sine",0.6,0.14); setTimeout(()=>tone(800,"sine",0.3,0.12),500); },
     rare:   () => { [0,120,260].forEach((d,i)=>setTimeout(()=>tone(600+i*300,"sine",0.4,0.14),d)); },
     menu:   () => { tone(440,"sine",0.1,0.06); },
@@ -961,7 +984,8 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
         attempts < 12 &&
         gs.stuck.some(sk => { let d=Math.abs(local-sk); if(d>Math.PI)d=2*Math.PI-d; return d < COLL*2.5; })
       );
-      gs.apple = { local, bornAt: Date.now() };
+      const kind = Math.random() < 0.15 ? "gold" : "red";
+      gs.apple = { local, bornAt: Date.now(), kind };
     }
 
     function norm(a) { while (a > Math.PI) a -= 2*Math.PI; while (a < -Math.PI) a += 2*Math.PI; return a; }
@@ -1184,8 +1208,10 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
     // Sits embedded on the log surface like a target, spinning with it.
     // Small glossy red apple + stem + leaf, with a soft pulsing glow so it
     // reads clearly as a bonus target against the wood.
-    function spawnAppleBreak(x, y) {
-      const colors = ["#C23B2E","#E0523E","#F4D9A6","#FFF0C8","#5C3818","#4A9460"];
+    function spawnAppleBreak(x, y, kind = "red") {
+      const colors = kind === "gold"
+        ? ["#F7C948","#FFD96A","#FFF2A8","#D99A1E","#6B4312","#6FA55F"]
+        : ["#C23B2E","#E0523E","#F4D9A6","#FFF0C8","#5C3818","#4A9460"];
       for (let i=0;i<18;i++) {
         const a = (i/18)*Math.PI*2 + (Math.random()-0.5)*0.7;
         const speed = 1.4 + Math.random()*3.8;
@@ -1209,12 +1235,13 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
         const ax = CX + Math.cos(w) * APPLE_R;
         const ay = LOG_CY + Math.sin(w) * APPLE_R;
         const SC = 1.6;   // apple is bigger now — easier to see and to hit
+        const isGold = gs.apple.kind === "gold";
 
         // Soft gold pulse glow behind the apple to draw the eye
         const pulse = 0.5 + 0.4*Math.sin(t*0.005);
         const glowR = 30 * SC * 0.7;
         const glow = ctx.createRadialGradient(ax,ay,0,ax,ay,glowR);
-        glow.addColorStop(0, `rgba(255,210,80,${0.35*pulse})`);
+        glow.addColorStop(0, isGold ? `rgba(255,220,90,${0.58*pulse})` : `rgba(255,210,80,${0.35*pulse})`);
         glow.addColorStop(1, "rgba(255,210,80,0)");
         ctx.fillStyle = glow;
         ctx.beginPath(); ctx.arc(ax,ay,glowR,0,Math.PI*2); ctx.fill();
@@ -1231,21 +1258,21 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
         ctx.scale(SC, SC);
 
         // Apple body — two overlapping circles for the classic apple silhouette
-        ctx.fillStyle = "#C23B2E";
+        ctx.fillStyle = isGold ? "#E7AA22" : "#C23B2E";
         ctx.beginPath(); ctx.arc(-3,0,8,0,Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(3,0,8,0,Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(0,2,9,0,Math.PI*2); ctx.fill();
 
         // Glossy highlight
-        ctx.fillStyle = "rgba(255,255,255,0.35)";
+        ctx.fillStyle = isGold ? "rgba(255,255,210,0.55)" : "rgba(255,255,255,0.35)";
         ctx.beginPath(); ctx.ellipse(-3,-3,2.6,3.6,0.4,0,Math.PI*2); ctx.fill();
 
         // Stem — points straight up, away from the log
-        ctx.strokeStyle = "#5C3818"; ctx.lineWidth = 1.6;
+        ctx.strokeStyle = isGold ? "#6B4312" : "#5C3818"; ctx.lineWidth = 1.6;
         ctx.beginPath(); ctx.moveTo(0,-7); ctx.lineTo(1,-12); ctx.stroke();
 
         // Leaf
-        ctx.fillStyle = "#4A9460";
+        ctx.fillStyle = isGold ? "#6FA55F" : "#4A9460";
         ctx.beginPath();
         ctx.ellipse(4,-11,3.4,1.8,-0.5,0,Math.PI*2);
         ctx.fill();
@@ -1426,6 +1453,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
       wobbles.length = 0;
       gs.phase = "idle";
       trySpawnApple();
+      if (onCoins) onCoins(map.levelReward ?? 2, "level");
       releaseQueuedThrow();
     }
 
@@ -1595,15 +1623,16 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
           const adx = f.x - ax, ady = f.y - ay;
           const appleDist = Math.sqrt(adx*adx + ady*ady);
           if (appleDist <= APPLE_HIT_RADIUS) {
+            const appleKind = gs.apple.kind || "red";
             gs.appleBurstPt = { x: ax, y: ay };
             gs.apple = null;
-            gs.appleBurst = 14;
-            spawnAppleBreak(ax, ay);
+            gs.appleBurst = appleKind === "gold" ? 20 : 14;
+            spawnAppleBreak(ax, ay, appleKind);
             gs.impactPt = { angle: appleWorld };
             spawnChips(appleWorld);
             triggerShake(3);
             snd.coin();
-            if (onCoins) onCoins(10);
+            if (onCoins) onCoins(appleKind === "gold" ? 50 : 10, appleKind === "gold" ? "goldApple" : "apple");
           }
         }
 
@@ -1652,10 +1681,6 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
 
       if (gs.over) {
         ctx.fillStyle="rgba(0,0,0,0.6)"; ctx.fillRect(0,0,W,H);
-        ctx.font="bold 20px 'Courier New',monospace"; ctx.fillStyle=C.text; ctx.textAlign="center";
-        ctx.fillText("GAME OVER",CX,H/2-10);
-        ctx.font="12px 'Courier New',monospace"; ctx.fillStyle=C.textMid;
-        ctx.fillText(`Score: ${gs.score}  ·  Level: ${gs.level}`,CX,H/2+14);
       }
       gs.raf = requestAnimationFrame(frame);
     }
@@ -1784,6 +1809,8 @@ function CaseModal({ crate, onCharge, onResult, onClose }) {
   const t0Ref      = useRef(Date.now());
   const canvasRef  = useRef(null);
   const doneRef    = useRef(false);
+  const lastTickSlotRef = useRef(-1);
+  const lastTickAtRef   = useRef(0);
 
   // Build reel lazily the first time
   if (reelItems.current.length === 0) {
@@ -1810,6 +1837,8 @@ function CaseModal({ crate, onCharge, onResult, onClose }) {
     velRef.current  = 9 + Math.random() * 4;   // initial scroll speed
     doneRef.current = false;
     t0Ref.current   = Date.now();
+    lastTickSlotRef.current = -1;
+    lastTickAtRef.current   = 0;
     setPhase("spinning");
     snd.open();
   }
@@ -1905,6 +1934,13 @@ function CaseModal({ crate, onCharge, onResult, onClose }) {
       }
 
       posRef.current += velRef.current;
+      const tickSlot = Math.floor((posRef.current + CANVAS_W / 2) / ITEM_W);
+      const tickNow = performance.now();
+      if (tickSlot !== lastTickSlotRef.current && tickNow - lastTickAtRef.current > 38) {
+        lastTickSlotRef.current = tickSlot;
+        lastTickAtRef.current = tickNow;
+        snd.caseTick();
+      }
 
       // Snap to target when close enough and slow enough
       if (posRef.current >= TARGET && velRef.current < 2.2) {
@@ -2035,33 +2071,27 @@ function CaseModal({ crate, onCharge, onResult, onClose }) {
 
         <div style={{ position:"relative", zIndex:1 }}>
 
-        {/* Header */}
-        <div style={{ fontWeight:700, fontSize:15, color:C.gold, marginBottom:2,
-            letterSpacing:"0.08em", fontFamily:"'Courier New',monospace" }}>
-          {crate.icon} {crate.name.toUpperCase()}
-        </div>
-        <div style={{ fontSize:11, color:C.textDim, marginBottom:16 }}>
-          🪙 {crate.price} to open
-        </div>
+        {phase !== "ready" && (
+          <>
+            <div style={{ fontWeight:700, fontSize:15, color:C.gold, marginBottom:2,
+                letterSpacing:"0.08em", fontFamily:"'Courier New',monospace" }}>
+              {crate.icon} {crate.name.toUpperCase()}
+            </div>
+            <div style={{ fontSize:11, color:C.textDim, marginBottom:16 }}>
+              🪙 {crate.price} to open
+            </div>
+          </>
+        )}
 
         {/* ── READY ── */}
         {phase === "ready" && (
           <>
-            <div style={{ border:`0.5px solid ${C.border}`, borderRadius:8,
-                padding:"10px 12px", marginBottom:16, textAlign:"left" }}>
-              {Object.entries(crate.weights).filter(([,v])=>v>0).map(([rar,pct])=>(
-                <div key={rar} style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
-                  <span style={{ fontSize:11, color:RARITIES[rar].color, fontWeight:600 }}>
-                    {RARITIES[rar].label}
-                  </span>
-                  <span style={{ fontSize:11, color:C.textDim, fontFamily:"monospace" }}>
-                    {pct < 0.01 ? `${(pct*100).toFixed(1)}%` : `${Math.round(pct*100)}%`}
-                  </span>
-                </div>
-              ))}
+            <div style={{ fontWeight:800, fontSize:20, color:C.gold, marginBottom:18,
+                letterSpacing:"0.08em", fontFamily:"'Courier New',monospace" }}>
+              ARE YOU SURE?
             </div>
-            <div style={{ display:"flex", gap:8, justifyContent:"center" }}>
-              <button onClick={handleOpen} style={BtnStyle(C.gold, C.goldDim)}>Open Case</button>
+            <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
+              <button onClick={handleOpen} style={BtnStyle(C.gold, C.goldDim)}>Open</button>
               <button onClick={onClose}   style={BtnStyle()}>Cancel</button>
             </div>
           </>
@@ -2084,11 +2114,9 @@ function CaseModal({ crate, onCharge, onResult, onClose }) {
         {/* ── RESULT ── */}
         {phase === "result" && result && (
           <div style={{ animation:"fadeIn 0.35s ease" }}>
-            {/* Glow ring behind knife */}
+            {/* Result knife preview */}
             <div style={{ position:"relative", display:"inline-block",
-                margin:"4px auto 10px", padding:8,
-                borderRadius:"50%",
-                boxShadow:`0 0 48px ${rr?.glow}, 0 0 16px ${rr?.glow}` }}>
+                margin:"4px auto 10px", padding:8 }}>
               <KnifePreview id={result.id} size={90} spin />
             </div>
             <div style={{ fontWeight:700, fontSize:20, color:C.text, marginBottom:6 }}>
@@ -2097,17 +2125,16 @@ function CaseModal({ crate, onCharge, onResult, onClose }) {
             <div style={{ marginBottom:6 }}>
               <Badge rarity={result.rarity} />
             </div>
-            <div style={{ fontSize:11, color:C.textDim, marginBottom:18 }}>
-              {result.cat} · Sell value 🪙 {result.value}
-            </div>
             <button
               onClick={() => onResult(result)}
               style={{
                 ...BtnStyle(rr?.color, rr?.color),
-                padding:"10px 32px", fontSize:13,
+                padding:"10px 32px", fontSize:14, fontWeight:900,
+                WebkitTextStroke:"0.25px currentColor",
+                textShadow:"0.35px 0 currentColor",
                 boxShadow:`0 0 16px ${rr?.glow}`,
               }}>
-              ✦ Collect
+              Collect
             </button>
           </div>
         )}
@@ -2152,6 +2179,7 @@ export default function App() {
   const [gameStarted, setGameStarted] = useState(false);
   const [introLaunching, setIntroLaunching] = useState(false);
   const [soundOn, setSoundOn]     = useState(true);   // mirrors SOUND_MUTED
+  const [gameOverInfo, setGameOverInfo] = useState(null);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const snd = useSound();
@@ -2199,26 +2227,40 @@ export default function App() {
   }
 
   // ── Game end ──
-  function onGameEnd(score) {
-    const playedMap = MAPS.find(m => m.id === save.activeMap) || MAPS[0];
-    const rate = playedMap.coinRate ?? 5;   // Practice Yard pays 1🪙/hit, other maps default to 5🪙/hit
-    const coins = score * rate;
+  function dismissGameOver() {
+    if (!gameOverInfo) return;
+    setGameOverInfo(null);
+    setIntroLaunching(false);
+    setGameStarted(true);
+    setGameKey(k => k + 1);
+  }
+
+  useEffect(() => {
+    if (!gameOverInfo) return;
+    const kd = e => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        dismissGameOver();
+      }
+    };
+    document.addEventListener("keydown", kd);
+    return () => document.removeEventListener("keydown", kd);
+  }, [gameOverInfo]);
+
+  function onGameEnd(score, level) {
     upd(p => {
       p.stats.score = Math.max(p.stats.score, score);
       p.stats.games++;
       p.stats.throws += score + 1;
-      p.coins += coins;
       return p;
     });
-    toast$(`Game over · +${coins} 🪙`, true);
-    setIntroLaunching(false);
-    setGameKey(k => k + 1); // remount after short delay
+    setGameOverInfo({ score, level });
   }
 
   // ── Bonus apple hit mid-game — instant coin reward, doesn't wait for game end ──
-  function onAppleCoins(amount) {
+  function onAppleCoins(amount, source = "apple") {
     upd(p => { p.coins += amount; return p; });
-    toast$(`🍎 Apple bonus! +${amount} 🪙`, true);
+    toast$(source === "level" ? `Level bonus! +${amount} 🪙` : source === "goldApple" ? `Golden apple bonus! +${amount} 🪙` : `🍎 Apple bonus! +${amount} 🪙`, true);
   }
 
   // ── Daily reward ──
@@ -2518,6 +2560,18 @@ export default function App() {
                   <GameCanvas equippedId={save.equipped} mapId={save.activeMap} onEnd={onGameEnd} onCoins={onAppleCoins} hideReadyKnife={introLaunching} key={gameKey + save.activeMap} />
                 </div>
               )}
+              {gameOverInfo && (
+                <button onClick={dismissGameOver} style={{
+                    position:"absolute", inset:0, zIndex:35, border:0, borderRadius:10,
+                    background:"rgba(0,0,0,0.72)", color:C.gold, cursor:"pointer",
+                    display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+                    fontFamily:"'Courier New',monospace", letterSpacing:"0.08em",
+                  }}>
+                  <div style={{ fontSize:34, fontWeight:900, marginBottom:12, textShadow:`0 0 20px ${C.goldDim}` }}>GAME OVER</div>
+                  <div style={{ fontSize:13, color:C.text, marginBottom:8 }}>SCORE {gameOverInfo.score} · LEVEL {gameOverInfo.level}</div>
+                  <div style={{ fontSize:11, color:C.textDim }}>CLICK · SPACE · TO CONTINUE</div>
+                </button>
+              )}
               {(!gameStarted || introLaunching) && (
               <button
                 onClick={()=>{
@@ -2621,7 +2675,7 @@ export default function App() {
               `}</style>
             )}
             <div style={{ display:gameStarted && !introLaunching ? "block" : "none", marginTop:-22, fontSize:10, color:C.textDim, fontFamily:"monospace" }}>
-              CLICK · SPACE · TAP to throw &nbsp;·&nbsp; {activeMap.coinRate ?? 5} 🪙 PER HIT
+              CLICK · SPACE · TAP to throw &nbsp;·&nbsp; {activeMap.levelReward ?? 2} 🪙 PER LEVEL
             </div>
           </div>
         )}
@@ -2660,7 +2714,7 @@ export default function App() {
                           SPEED ×{m.speedMod.toFixed(2)}
                         </span>
                         <span style={{ fontSize:10, color:"#E8C878", fontFamily:"monospace" }}>
-                          {m.coinRate ?? 5} 🪙/HIT
+                          {m.levelReward ?? 2} 🪙/LEVEL
                         </span>
                         {locked && (
                           <span style={{ fontSize:10, color:"#D08888", fontFamily:"monospace" }}>
@@ -2782,7 +2836,8 @@ export default function App() {
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))", gap:12 }}>
               {CRATES.map(c=>(
                 <div key={c.id} style={{ border:`0.5px solid ${C.borderHi}`, borderRadius:10,
-                    padding:"16px 14px", background:C.surface }}>
+                    padding:"16px 14px", background:C.surface, minHeight:230,
+                    display:"flex", flexDirection:"column" }}>
                   <div style={{ fontSize:36, textAlign:"center", marginBottom:8 }}>{c.icon}</div>
                   <div style={{ fontWeight:700, fontSize:13, color:C.text, marginBottom:8,
                       textAlign:"center", fontFamily:"'Courier New',monospace",
@@ -2797,6 +2852,7 @@ export default function App() {
                       </span>
                     </div>
                   ))}
+                  <div style={{ marginTop:"auto" }}>
                   <div style={{ fontWeight:700, fontSize:14, color:C.gold, textAlign:"center",
                       fontFamily:"monospace", margin:"10px 0 10px" }}>🪙 {c.price}</div>
                   <button onClick={()=>buyCase(c)}
@@ -2808,6 +2864,7 @@ export default function App() {
                       color: save.coins>=c.price?C.gold:C.textDim,
                       opacity: save.coins<c.price?0.5:1,
                   }}>{save.coins<c.price?"NEED COINS":"OPEN CASE"}</button>
+                  </div>
                 </div>
               ))}
             </div>
