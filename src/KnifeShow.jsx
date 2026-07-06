@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 // spinning log preview — the product itself is always on stage.
 const C = {
   bg:       "#0E0C0A",
+  bgDeep:   "#070604",
   surface:  "#161410",
   panel:    "#1C1916",
   border:   "#2E2920",
@@ -29,47 +30,69 @@ const RARITIES = {
   mythic:    { label:"Mythic",    color:"#CC4488", glow:"rgba(204,68,136,0.6)", drop:0.009 },
 };
 
-// ─── KNIFE SKINS (15 designs, all original) ───────────────────────────────────
+// ─── KNIFE SKINS (25 designs, all original) ───────────────────────────────────
 // Each has a draw(ctx, x, y, angle, t) — renders tip-up when angle=0.
 // Value = coin sell price. BuyPrice = shop cost.
 const KNIVES = [
-  // ── BASIC (3) ──────────────────────────────────────────────────────────────
+  // ── BASIC (4) ──────────────────────────────────────────────────────────────
   { id:"k_steel",  name:"Field Steel",    rarity:"common",    cat:"Basic",    buyPrice:30,   value:12,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#A8A49C";ctx.beginPath();ctx.moveTo(0,-50);ctx.lineTo(3,-18);ctx.lineTo(3,2);ctx.lineTo(-3,2);ctx.lineTo(-3,-18);ctx.closePath();ctx.fill();ctx.fillStyle="#5A5650";ctx.beginPath();ctx.roundRect(-3,2,6,20,2);ctx.fill();ctx.restore(); }},
   { id:"k_cleaver",name:"Block Cleaver",  rarity:"common",    cat:"Basic",    buyPrice:30,   value:12,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#C8C4BC";ctx.beginPath();ctx.moveTo(-5,-46);ctx.lineTo(6,-46);ctx.lineTo(6,-12);ctx.lineTo(8,-12);ctx.lineTo(8,-4);ctx.lineTo(-5,-4);ctx.closePath();ctx.fill();ctx.strokeStyle="#9E9A92";ctx.lineWidth=0.5;ctx.stroke();ctx.fillStyle="#7A7670";ctx.beginPath();ctx.roundRect(-4,-4,8,22,2);ctx.fill();ctx.restore(); }},
+  { id:"k_rusty",  name:"Rusty Ripper",   rarity:"common",    cat:"Basic",    buyPrice:30,   value:12,
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#8A6048";ctx.beginPath();ctx.moveTo(0,-48);ctx.lineTo(3,-16);ctx.lineTo(3,2);ctx.lineTo(-3,2);ctx.lineTo(-3,-16);ctx.closePath();ctx.fill();ctx.fillStyle="#5A3826";[[-1,-38],[2,-28],[-2,-20]].forEach(([px,py])=>{ctx.beginPath();ctx.arc(px,py,1.4,0,Math.PI*2);ctx.fill();});ctx.fillStyle="#2E2016";ctx.beginPath();ctx.roundRect(-3,2,6,20,2);ctx.fill();ctx.restore(); }},
+  { id:"k_camp",   name:"Camp Knife",     rarity:"common",    cat:"Basic",    buyPrice:30,   value:12,
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#B4B0A8";ctx.beginPath();ctx.moveTo(0,-46);ctx.lineTo(3,-20);ctx.lineTo(3,0);ctx.lineTo(-3,0);ctx.lineTo(-3,-20);ctx.closePath();ctx.fill();ctx.fillStyle="#7A5636";ctx.beginPath();ctx.roundRect(-4,0,8,24,3);ctx.fill();ctx.strokeStyle="#3E2A18";ctx.lineWidth=1;[4,10,16].forEach(yy=>{ctx.beginPath();ctx.moveTo(-4,yy);ctx.lineTo(4,yy);ctx.stroke();});ctx.restore(); }},
   { id:"k_tanto",  name:"Tanto Point",    rarity:"uncommon",  cat:"Basic",    buyPrice:60,   value:24,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#B8B4AC";ctx.beginPath();ctx.moveTo(0,-52);ctx.lineTo(4,-38);ctx.lineTo(4,-18);ctx.lineTo(-4,-14);ctx.lineTo(-4,-18);ctx.closePath();ctx.fill();ctx.fillStyle="#383634";ctx.beginPath();ctx.roundRect(-3,-14,6,26,3);ctx.fill();ctx.strokeStyle="#C89B3C";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-4,-2);ctx.lineTo(4,-2);ctx.stroke();ctx.restore(); }},
 
-  // ── FANTASY (3) ────────────────────────────────────────────────────────────
+  // ── NATURE (1) ─────────────────────────────────────────────────────────────
+  { id:"k_jungle", name:"Jungle Fang",    rarity:"uncommon",  cat:"Nature",   buyPrice:60,   value:24,
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#4A8C3A";ctx.beginPath();ctx.moveTo(0,-54);ctx.bezierCurveTo(5,-34,5,-14,3,-4);ctx.lineTo(-3,-4);ctx.bezierCurveTo(-5,-14,-5,-34,0,-54);ctx.fill();ctx.strokeStyle="#1E5C1A";ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(0,-52);ctx.lineTo(0,-6);ctx.stroke();ctx.fillStyle="#3A2810";ctx.beginPath();ctx.roundRect(-3,-4,6,20,2);ctx.fill();ctx.restore(); }},
+
+  // ── FANTASY (4) ────────────────────────────────────────────────────────────
   { id:"k_elven",  name:"Elven Whisper",  rarity:"uncommon",  cat:"Fantasy",  buyPrice:60,   value:24,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#6DCFAA";ctx.beginPath();ctx.moveTo(0,-56);ctx.bezierCurveTo(4,-36,4,-16,3,-6);ctx.lineTo(-3,-6);ctx.bezierCurveTo(-4,-16,-4,-36,0,-56);ctx.fill();ctx.strokeStyle="#1E8C60";ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(0,-54);ctx.lineTo(0,-8);ctx.stroke();ctx.fillStyle="#0C5038";ctx.beginPath();ctx.roundRect(-3,-6,6,20,2);ctx.fill();ctx.restore(); }},
   { id:"k_runic",  name:"Runic Carver",   rarity:"rare",      cat:"Fantasy",  buyPrice:150,  value:60,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#9A94DC";ctx.beginPath();ctx.moveTo(0,-54);ctx.lineTo(5,-26);ctx.lineTo(5,-6);ctx.lineTo(-5,-6);ctx.lineTo(-5,-26);ctx.closePath();ctx.fill();const p=0.4+0.3*Math.sin(t*0.003);ctx.strokeStyle=`rgba(160,152,240,${p})`;ctx.lineWidth=1;[-42,-30,-18].forEach(yy=>{ctx.beginPath();ctx.moveTo(-4,yy);ctx.lineTo(4,yy);ctx.stroke();});ctx.fillStyle="#2E2870";ctx.beginPath();ctx.roundRect(-3,-6,6,24,2);ctx.fill();ctx.restore(); }},
   { id:"k_bone",   name:"Boneclaw",       rarity:"rare",      cat:"Fantasy",  buyPrice:150,  value:60,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#E8D89C";ctx.beginPath();ctx.moveTo(0,-54);ctx.lineTo(4,-24);ctx.lineTo(6,-8);ctx.lineTo(-6,-8);ctx.lineTo(-4,-24);ctx.closePath();ctx.fill();ctx.fillStyle="#B09040";ctx.beginPath();ctx.roundRect(-4,-8,8,9,1);ctx.fill();ctx.fillStyle="#5C3810";ctx.beginPath();ctx.roundRect(-3,1,6,20,3);ctx.fill();ctx.restore(); }},
+  { id:"k_crimson",name:"Crimson Tide",   rarity:"rare",      cat:"Fantasy",  buyPrice:150,  value:60,
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#A02838";ctx.beginPath();ctx.moveTo(0,-56);ctx.bezierCurveTo(6,-38,-2,-24,5,-6);ctx.lineTo(-5,-6);ctx.bezierCurveTo(2,-24,-6,-38,0,-56);ctx.fill();const p=0.4+0.35*Math.sin(t*0.004);ctx.strokeStyle=`rgba(255,80,100,${p})`;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(0,-52);ctx.lineTo(0,-8);ctx.stroke();ctx.fillStyle="#3C0A12";ctx.beginPath();ctx.roundRect(-4,-6,8,22,3);ctx.fill();ctx.restore(); }},
 
-  // ── NEON (2) ───────────────────────────────────────────────────────────────
+  // ── NEON (3) ───────────────────────────────────────────────────────────────
   { id:"k_neonpink",name:"Neon Slash",    rarity:"rare",      cat:"Neon",     buyPrice:150,  value:60,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#1E1E1C";ctx.beginPath();ctx.moveTo(0,-54);ctx.lineTo(3,-18);ctx.lineTo(3,2);ctx.lineTo(-3,2);ctx.lineTo(-3,-18);ctx.closePath();ctx.fill();const g=ctx.createLinearGradient(0,-54,0,2);g.addColorStop(0,"#FF4499");g.addColorStop(1,"rgba(255,68,153,0)");ctx.strokeStyle=g;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(0,-52);ctx.lineTo(0,0);ctx.stroke();ctx.strokeStyle=`rgba(255,68,153,${0.3+0.3*Math.sin(t*0.005)})`;ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(0,-52);ctx.lineTo(0,0);ctx.stroke();ctx.fillStyle="#1E1E1C";ctx.beginPath();ctx.roundRect(-3,2,6,20,2);ctx.fill();ctx.restore(); }},
   { id:"k_neoncyan",name:"Cyan Circuit",  rarity:"epic",      cat:"Neon",     buyPrice:400,  value:160,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#181818";ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(4,-22);ctx.lineTo(4,2);ctx.lineTo(-4,2);ctx.lineTo(-4,-22);ctx.closePath();ctx.fill();const p=0.5+0.4*Math.sin(t*0.005);ctx.strokeStyle=`rgba(64,220,180,${p})`;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(0,-54);ctx.lineTo(0,0);ctx.stroke();ctx.strokeStyle="#40DCB4";ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,-54);ctx.lineTo(0,0);ctx.stroke();ctx.fillStyle="#022C22";ctx.beginPath();ctx.roundRect(-3,2,6,20,2);ctx.fill();ctx.restore(); }},
+  { id:"k_toxicbite",name:"Toxic Bite",   rarity:"epic",      cat:"Neon",     buyPrice:400,  value:160,
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#183018";ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(4,-22);ctx.lineTo(4,2);ctx.lineTo(-4,2);ctx.lineTo(-4,-22);ctx.closePath();ctx.fill();const p=0.5+0.4*Math.sin(t*0.006);ctx.strokeStyle=`rgba(140,230,60,${p})`;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,-54);ctx.lineTo(0,0);ctx.stroke();ctx.strokeStyle="#8CE63C";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,-54);ctx.lineTo(0,0);ctx.stroke();ctx.fillStyle="#0A1A0A";ctx.beginPath();ctx.roundRect(-3,2,6,20,2);ctx.fill();ctx.restore(); }},
 
-  // ── ELEMENTAL (2) ──────────────────────────────────────────────────────────
+  // ── ELEMENTAL (5) ──────────────────────────────────────────────────────────
+  { id:"k_frostnip",name:"Frost Nip",     rarity:"uncommon",  cat:"Elemental",buyPrice:60,   value:24,
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#9CC4E8";ctx.beginPath();ctx.moveTo(0,-52);ctx.lineTo(4,-24);ctx.lineTo(4,-4);ctx.lineTo(-4,-4);ctx.lineTo(-4,-24);ctx.closePath();ctx.fill();ctx.strokeStyle="rgba(220,240,255,0.5)";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-3,-40);ctx.lineTo(3,-36);ctx.stroke();ctx.fillStyle="#1A3858";ctx.beginPath();ctx.roundRect(-3,-4,6,20,2);ctx.fill();ctx.restore(); }},
+  { id:"k_storm",  name:"Storm Edge",     rarity:"rare",      cat:"Elemental",buyPrice:150,  value:60,
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#2C3E50";ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(4,-24);ctx.lineTo(4,-4);ctx.lineTo(-4,-4);ctx.lineTo(-4,-24);ctx.closePath();ctx.fill();const fl=0.4+0.5*Math.abs(Math.sin(t*0.008));ctx.strokeStyle=`rgba(140,200,255,${fl})`;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(0,-52);ctx.lineTo(-2,-38);ctx.lineTo(2,-30);ctx.lineTo(-1,-16);ctx.lineTo(0,-8);ctx.stroke();ctx.fillStyle="#141C24";ctx.beginPath();ctx.roundRect(-3,-4,6,20,2);ctx.fill();ctx.restore(); }},
   { id:"k_inferno",name:"Inferno Fang",   rarity:"epic",      cat:"Elemental",buyPrice:400,  value:160,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);const fl=Math.sin(t*0.008)*2;ctx.fillStyle="#C04420";ctx.beginPath();ctx.moveTo(0,-54+fl);ctx.lineTo(5,-20);ctx.lineTo(5,2);ctx.lineTo(-5,2);ctx.lineTo(-5,-20);ctx.closePath();ctx.fill();ctx.fillStyle="#E8901C";ctx.beginPath();ctx.moveTo(0,-50+fl);ctx.lineTo(3,-26);ctx.lineTo(-3,-26);ctx.closePath();ctx.fill();ctx.fillStyle="#601808";ctx.beginPath();ctx.roundRect(-4,2,8,22,3);ctx.fill();ctx.restore(); }},
   { id:"k_glacier",name:"Glacier Spike",  rarity:"epic",      cat:"Elemental",buyPrice:400,  value:160,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#78AADC";ctx.beginPath();ctx.moveTo(0,-58);ctx.lineTo(4,-28);ctx.lineTo(6,-8);ctx.lineTo(-6,-8);ctx.lineTo(-4,-28);ctx.closePath();ctx.fill();ctx.strokeStyle=`rgba(180,220,255,${0.4+0.3*Math.sin(t*0.004)})`;ctx.lineWidth=2;[-46,-34,-22].forEach(yy=>{ctx.beginPath();ctx.moveTo(-5,yy);ctx.lineTo(5,yy+4);ctx.stroke();});ctx.fillStyle="#1A4080";ctx.beginPath();ctx.roundRect(-3,-8,6,30,3);ctx.fill();ctx.restore(); }},
+  { id:"k_solarflare",name:"Solar Flare", rarity:"epic",      cat:"Elemental",buyPrice:400,  value:160,
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);const fl=Math.sin(t*0.007)*2;ctx.fillStyle="#E86A1C";ctx.beginPath();ctx.moveTo(0,-58+fl);ctx.lineTo(5,-24);ctx.lineTo(5,0);ctx.lineTo(-5,0);ctx.lineTo(-5,-24);ctx.closePath();ctx.fill();const g=ctx.createLinearGradient(0,-58,0,0);g.addColorStop(0,"rgba(255,220,100,0.9)");g.addColorStop(1,"rgba(255,220,100,0)");ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-54+fl);ctx.lineTo(2,-30);ctx.lineTo(-2,-30);ctx.closePath();ctx.fill();ctx.fillStyle="#401A08";ctx.beginPath();ctx.roundRect(-4,0,8,22,3);ctx.fill();ctx.restore(); }},
 
-  // ── GOLD / DIAMOND (2) ────────────────────────────────────────────────────
+  // ── GOLD / DIAMOND (3) ────────────────────────────────────────────────────
   { id:"k_goldleaf",name:"Gold Leaf",     rarity:"mythic", cat:"Gold",     buyPrice:1200, value:480,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#C89B3C";ctx.beginPath();ctx.moveTo(0,-58);ctx.lineTo(4,-22);ctx.lineTo(4,2);ctx.lineTo(-4,2);ctx.lineTo(-4,-22);ctx.closePath();ctx.fill();const s=0.5+0.4*Math.sin(t*0.005);ctx.strokeStyle=`rgba(255,220,120,${s})`;ctx.lineWidth=2;[{x:-3,y:-46},{x:3,y:-32},{x:-3,y:-20}].forEach(p=>{ctx.beginPath();ctx.moveTo(p.x-3,p.y);ctx.lineTo(p.x+3,p.y+6);ctx.stroke();});ctx.fillStyle="#6A4A10";ctx.beginPath();ctx.roundRect(-4,2,8,9,2);ctx.fill();ctx.fillStyle="#C89B3C";ctx.beginPath();ctx.roundRect(-3,11,6,14,3);ctx.fill();ctx.restore(); }},
   { id:"k_diamond", name:"Diamond Edge",  rarity:"mythic", cat:"Diamond",  buyPrice:1200, value:480,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#78AADC";ctx.beginPath();ctx.moveTo(0,-60);ctx.lineTo(5,-30);ctx.lineTo(5,-4);ctx.lineTo(-5,-4);ctx.lineTo(-5,-30);ctx.closePath();ctx.fill();ctx.fillStyle="#D8EEFF";ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(3,-40);ctx.lineTo(0,-36);ctx.lineTo(-3,-40);ctx.closePath();ctx.fill();const s=`rgba(200,230,255,${0.5+0.4*Math.sin(t*0.006)})`;ctx.strokeStyle=s;ctx.lineWidth=1.5;[[-4,-24],[-4,-14]].forEach(([px,py])=>{ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(-px,py+4);ctx.stroke();});ctx.fillStyle="#0A3060";ctx.beginPath();ctx.roundRect(-3,-4,6,28,3);ctx.fill();ctx.restore(); }},
+  { id:"k_phoenix", name:"Phoenix Wing",  rarity:"mythic", cat:"Gold",     buyPrice:1200, value:480,
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);const g=ctx.createLinearGradient(0,-60,0,0);g.addColorStop(0,"#FFD24A");g.addColorStop(1,"#C0401C");ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-60);ctx.lineTo(5,-24);ctx.lineTo(5,2);ctx.lineTo(-5,2);ctx.lineTo(-5,-24);ctx.closePath();ctx.fill();const s=0.5+0.4*Math.sin(t*0.005);ctx.fillStyle=`rgba(255,200,90,${s})`;ctx.beginPath();ctx.moveTo(-5,-30);ctx.lineTo(-13,-24);ctx.lineTo(-5,-18);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(5,-30);ctx.lineTo(13,-24);ctx.lineTo(5,-18);ctx.closePath();ctx.fill();ctx.fillStyle="#5A1E08";ctx.beginPath();ctx.roundRect(-4,2,8,22,3);ctx.fill();ctx.restore(); }},
 
-  // ── MYTHIC (3) ────────────────────────────────────────────────────────────
+  // ── MYTHIC (4) ────────────────────────────────────────────────────────────
   { id:"k_plasma",  name:"Plasma Shift",  rarity:"legendary",    cat:"Animated", buyPrice:3000, value:1200,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);const h=(t*0.25)%360;ctx.fillStyle=`hsl(${h},80%,52%)`;ctx.beginPath();ctx.moveTo(0,-58);ctx.lineTo(4,-22);ctx.lineTo(4,2);ctx.lineTo(-4,2);ctx.lineTo(-4,-22);ctx.closePath();ctx.fill();ctx.strokeStyle=`hsla(${(h+80)%360},90%,72%,0.7)`;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(0,0);ctx.stroke();ctx.fillStyle="#181818";ctx.beginPath();ctx.roundRect(-3,2,6,20,2);ctx.fill();ctx.restore(); }},
+  { id:"k_celestial",name:"Celestial Reaper",rarity:"legendary", cat:"Animated", buyPrice:3000, value:1200,
+    draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);const h=(t*0.15+180)%360;ctx.fillStyle=`hsl(${h},70%,22%)`;ctx.beginPath();ctx.moveTo(0,-62);ctx.lineTo(5,-28);ctx.lineTo(5,2);ctx.lineTo(-5,2);ctx.lineTo(-5,-28);ctx.closePath();ctx.fill();for(let i=0;i<5;i++){const py=-56+i*12,px=3*Math.sin(t*0.004+i*1.3);ctx.fillStyle=`rgba(255,255,255,${0.3+0.3*Math.sin(t*0.006+i)})`;ctx.beginPath();ctx.arc(px,py,1.3,0,Math.PI*2);ctx.fill();}ctx.strokeStyle=`hsla(${(h+140)%360},90%,72%,0.6)`;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,-58);ctx.lineTo(0,0);ctx.stroke();ctx.fillStyle="#0A0616";ctx.beginPath();ctx.roundRect(-4,2,8,22,3);ctx.fill();ctx.restore(); }},
   { id:"k_void",    name:"Void Reaper",   rarity:"legendary",    cat:"Animated", buyPrice:3000, value:1200,
     draw(ctx,x,y,a,t,sc=1){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(a);ctx.fillStyle="#0E0A1E";ctx.beginPath();ctx.moveTo(0,-60);ctx.lineTo(5,-26);ctx.lineTo(5,2);ctx.lineTo(-5,2);ctx.lineTo(-5,-26);ctx.closePath();ctx.fill();for(let i=0;i<6;i++){const py=-54+i*10,px=2.5*Math.sin(t*0.006+i*1.1);ctx.fillStyle=`rgba(160,140,240,${0.2+0.15*Math.sin(t*0.004+i)})`;ctx.beginPath();ctx.arc(px,py,1.8,0,Math.PI*2);ctx.fill();}ctx.strokeStyle=`rgba(140,120,220,${0.3+0.2*Math.sin(t*0.005)})`;ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(-5,0);ctx.lineTo(5,0);ctx.stroke();ctx.fillStyle="#1A1040";ctx.beginPath();ctx.roundRect(-3,2,6,20,3);ctx.fill();ctx.restore(); }},
   { id:"k_sovereign",name:"The Sovereign",rarity:"legendary",   cat:"Limited",  buyPrice:3000, value:1200,
@@ -1731,7 +1754,7 @@ function GameCanvas({ equippedId, mapId, onEnd, onCoins, hideReadyKnife = false 
     <canvas ref={ref} width={400} height={500}
       style={{ display:"block", cursor:"crosshair", borderRadius:8,
                border:`0.5px solid ${C.border}`, boxShadow:`0 0 40px rgba(200,155,60,0.06)`,
-               maxWidth:"100%" }} />
+               width:"100%", height:"100%" }} />
   );
 }
 
@@ -2362,7 +2385,13 @@ export default function App() {
   ];
 
   return (
-    <div style={{ background:C.bg, minHeight:600, fontFamily:"system-ui,sans-serif", color:C.text, position:"relative" }}>
+    <div style={{
+        minHeight:"max(600px, 100vh)",
+        backgroundColor:C.bg,
+        backgroundImage:`radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), radial-gradient(ellipse 1100px 760px at 50% 280px, ${C.surface} 0%, ${C.bg} 60%, ${C.bgDeep} 100%)`,
+        backgroundSize:"28px 28px, 100% 100%",
+        backgroundAttachment:"fixed, fixed",
+        fontFamily:"system-ui,sans-serif", color:C.text, position:"relative" }}>
 
       {/* ── GLOBAL MODALS ── */}
       {inspecting && <InspectModal knife={inspecting} onClose={()=>setInspecting(null)} />}
@@ -2546,7 +2575,11 @@ export default function App() {
         {/* ══ PLAY ══ */}
         {screen==="play" && (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:10 }}>
-            <div style={{ position:"relative", width:360, maxWidth:"100%", height:500 }}>
+            <style>{`
+              .ks-stage { position:relative; width:min(400px, 94vw); max-width:100%; aspect-ratio:4/5; }
+              @media (min-width:900px) { .ks-stage { width:460px; } }
+            `}</style>
+            <div className="ks-stage">
               {!gameStarted && !introLaunching && (
                 <div style={{ position:"absolute", inset:0, opacity:0.72, filter:"brightness(0.82) saturate(0.9)" }}>
                   <StartScenePreview equippedId={save.equipped} mapId={save.activeMap} />
@@ -2585,8 +2618,7 @@ export default function App() {
                   }, 840);
                 }}
                 style={{
-                  position:"absolute", left:0, top:0,
-                  width:360, maxWidth:"100%", height:500, borderRadius:10,
+                  position:"absolute", inset:0, borderRadius:10,
                   border:`0.5px solid ${C.goldDim}`,
                   background:introLaunching ? "rgba(10,8,7,0.20)" : "rgba(10,8,7,0.42)",
                   color:C.gold, cursor:"pointer", display:"flex",
@@ -2674,7 +2706,7 @@ export default function App() {
                 }
               `}</style>
             )}
-            <div style={{ display:gameStarted && !introLaunching ? "block" : "none", marginTop:-22, fontSize:10, color:C.textDim, fontFamily:"monospace" }}>
+            <div style={{ display:gameStarted && !introLaunching ? "block" : "none", fontSize:11, color:C.textDim, fontFamily:"monospace", textAlign:"center" }}>
               CLICK · SPACE · TAP to throw &nbsp;·&nbsp; {activeMap.levelReward ?? 2} 🪙 PER LEVEL
             </div>
           </div>
