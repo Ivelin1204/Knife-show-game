@@ -2442,9 +2442,19 @@ export default function App() {
       )}
 
       {/* ── TOP BAR ── */}
-      <div style={{ background:C.surface, borderBottom:`0.5px solid ${C.border}`,
-          padding:"0 14px", display:"flex", alignItems:"center", height:44 }}>
-        <span style={{ fontWeight:700, fontSize:14, color:C.gold, letterSpacing:"0.1em",
+      <style>{`
+        .ks-topbar { height:44px; padding:0 14px; }
+        .ks-topbar-title { font-size:14px; }
+        .ks-topbar-coins { font-size:13px; padding:3px 12px; }
+        @media (max-width:899px) {
+          .ks-topbar { height:64px; padding:0 18px; }
+          .ks-topbar-title { font-size:19px; }
+          .ks-topbar-coins { font-size:16px; padding:6px 16px; }
+        }
+      `}</style>
+      <div className="ks-topbar" style={{ background:C.surface, borderBottom:`0.5px solid ${C.border}`,
+          display:"flex", alignItems:"center" }}>
+        <span className="ks-topbar-title" style={{ fontWeight:700, color:C.gold, letterSpacing:"0.1em",
             fontFamily:"'Courier New',monospace", flex:1 }}>◆ KNIFE SHOW</span>
         {canDaily && (
           <button onClick={claimDaily} style={{
@@ -2454,9 +2464,9 @@ export default function App() {
             📅 DAILY +75
           </button>
         )}
-        <div style={{ fontFamily:"'Courier New',monospace", fontWeight:700, fontSize:13,
+        <div className="ks-topbar-coins" style={{ fontFamily:"'Courier New',monospace", fontWeight:700,
             color:C.gold, background:C.goldDim+"33", borderRadius:5,
-            padding:"3px 12px", border:`0.5px solid ${C.goldDim}` }}>
+            border:`0.5px solid ${C.goldDim}` }}>
           🪙 {save.coins}
         </div>
       </div>
@@ -2466,8 +2476,8 @@ export default function App() {
         .ks-nav-btn { padding:10px 14px; font-size:10px; }
         .ks-nav-btn .ks-nav-icon { font-size:11px; }
         @media (max-width:899px) {
-          .ks-nav-btn { padding:18px 20px; font-size:16px; }
-          .ks-nav-btn .ks-nav-icon { font-size:18px; }
+          .ks-nav-btn { padding:14px 17px; font-size:14px; }
+          .ks-nav-btn .ks-nav-icon { font-size:16px; }
         }
       `}</style>
       <div style={{ background:C.surface, borderBottom:`0.5px solid ${C.border}`,
