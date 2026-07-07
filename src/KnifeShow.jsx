@@ -2225,7 +2225,12 @@ export default function App() {
         // Merge with defaults so older saves (pre-Maps update) gain new fields
         const merged = loaded ? { ...DEFAULT_SAVE, ...loaded } : { ...DEFAULT_SAVE };
         // Stable per-browser identity so repeat games overwrite one leaderboard row.
-        if (!merged.playerId) merged.playerId = crypto.randomUUID();
+        // Not every browser has crypto.randomUUID, so fall back to a manual id.
+        if (!merged.playerId) {
+          merged.playerId = (typeof crypto !== "undefined" && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+        }
         setSave(merged);
       } catch { setSave({ ...DEFAULT_SAVE }); }
     }
