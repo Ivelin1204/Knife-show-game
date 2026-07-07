@@ -2259,6 +2259,9 @@ export default function App() {
     setEditingName(false);
     setNameDraft("");
     toast$("Player name saved", true);
+    // Keep an existing leaderboard row's name in sync — otherwise it only
+    // refreshes the next time this player sets a new personal best.
+    if (save.stats.score > 0) submitScore(save.playerId, clean, save.stats.score, 0);
   }
 
   // ── Game end ──
