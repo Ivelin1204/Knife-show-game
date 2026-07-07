@@ -2466,8 +2466,8 @@ export default function App() {
         .ks-nav-btn { padding:10px 14px; font-size:10px; }
         .ks-nav-btn .ks-nav-icon { font-size:11px; }
         @media (max-width:899px) {
-          .ks-nav-btn { padding:14px 16px; font-size:13px; }
-          .ks-nav-btn .ks-nav-icon { font-size:15px; }
+          .ks-nav-btn { padding:18px 20px; font-size:16px; }
+          .ks-nav-btn .ks-nav-icon { font-size:18px; }
         }
       `}</style>
       <div style={{ background:C.surface, borderBottom:`0.5px solid ${C.border}`,
