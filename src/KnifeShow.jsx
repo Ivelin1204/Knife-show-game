@@ -2223,7 +2223,10 @@ export default function App() {
         const r = await window.storage.get("ks_v1_save");
         const loaded = r ? JSON.parse(r.value) : null;
         // Merge with defaults so older saves (pre-Maps update) gain new fields
-        setSave(loaded ? { ...DEFAULT_SAVE, ...loaded } : { ...DEFAULT_SAVE });
+        const merged = loaded ? { ...DEFAULT_SAVE, ...loaded } : { ...DEFAULT_SAVE };
+        // Stable per-browser identity so repeat games overwrite one leaderboard row.
+        if (!merged.playerId) merged.playerId = crypto.randomUUID();
+        setSave(merged);
       } catch { setSave({ ...DEFAULT_SAVE }); }
     }
     load();
@@ -2280,6 +2283,7 @@ export default function App() {
   }, [gameOverInfo]);
 
   function onGameEnd(score, level) {
+    const isNewBest = score > save.stats.score;
     upd(p => {
       p.stats.score = Math.max(p.stats.score, score);
       p.stats.games++;
@@ -2287,7 +2291,7 @@ export default function App() {
       return p;
     });
     setGameOverInfo({ score, level });
-    if (score > 0) submitScore(save.name, score, level);
+    if (isNewBest) submitScore(save.playerId, save.name, score, level);
   }
 
   // ── Bonus apple hit mid-game — instant coin reward, doesn't wait for game end ──

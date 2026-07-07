@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import {
-  getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp,
+  getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs, serverTimestamp,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -16,9 +16,12 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const scoresRef = collection(db, "scores");
 
-export async function submitScore(name, score, level) {
+// One document per player (keyed by their persistent local playerId), so
+// repeat games overwrite the same row instead of piling up new ones.
+export async function submitScore(playerId, name, score, level) {
+  if (!playerId) return;
   try {
-    await addDoc(scoresRef, {
+    await setDoc(doc(scoresRef, playerId), {
       name: String(name || "Player").slice(0, 20),
       score: Math.max(0, Math.floor(Number(score) || 0)),
       level: Math.max(0, Math.floor(Number(level) || 0)),
