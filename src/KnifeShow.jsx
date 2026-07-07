@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { submitScore, fetchTopScores } from "./leaderboard.js";
 
 // ─── DESIGN TOKENS ───────────────────────────────────────────────────────────
 // Dark showroom palette: near-black walls, warm gold accents, coloured rarity
@@ -2203,6 +2204,14 @@ export default function App() {
   const [introLaunching, setIntroLaunching] = useState(false);
   const [soundOn, setSoundOn]     = useState(true);   // mirrors SOUND_MUTED
   const [gameOverInfo, setGameOverInfo] = useState(null);
+  const [liveBoard, setLiveBoard] = useState(null);
+
+  useEffect(() => {
+    if (screen !== "board") return;
+    let cancelled = false;
+    fetchTopScores(20).then(rows => { if (!cancelled) setLiveBoard(rows); });
+    return () => { cancelled = true; };
+  }, [screen]);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const snd = useSound();
@@ -2278,6 +2287,7 @@ export default function App() {
       return p;
     });
     setGameOverInfo({ score, level });
+    if (score > 0) submitScore(save.name, score, level);
   }
 
   // ── Bonus apple hit mid-game — instant coin reward, doesn't wait for game end ──
@@ -2352,10 +2362,17 @@ export default function App() {
   const activeMap = MAPS.find(m => m.id === save.activeMap) || MAPS[0];
   const rarityFilters = ["all","common","uncommon","rare","epic","mythic","legendary"];
 
-  // Leaderboard: merge seed + player if score > 0
-  const board = [...SEED_BOARD];
-  if (save.stats.score > 0) {
-    board.push({ name: save.name, score: save.stats.score, isMe: true });
+  // Leaderboard: real scores from Firestore once loaded, seed data as a fallback
+  // while it's loading (or if it comes back empty).
+  let board;
+  if (liveBoard && liveBoard.length) {
+    board = liveBoard.map(e => ({ ...e, isMe: e.name === save.name && e.score === save.stats.score }));
+    if (save.stats.score > 0 && !board.some(e => e.isMe)) {
+      board = [...board, { name: save.name, score: save.stats.score, isMe: true }];
+    }
+  } else {
+    board = [...SEED_BOARD];
+    if (save.stats.score > 0) board.push({ name: save.name, score: save.stats.score, isMe: true });
   }
   board.sort((a,b) => b.score - a.score);
 
