@@ -2462,17 +2462,25 @@ export default function App() {
       </div>
 
       {/* ── NAV ── */}
+      <style>{`
+        .ks-nav-btn { padding:10px 14px; font-size:10px; }
+        .ks-nav-btn .ks-nav-icon { font-size:11px; }
+        @media (max-width:899px) {
+          .ks-nav-btn { padding:14px 16px; font-size:13px; }
+          .ks-nav-btn .ks-nav-icon { font-size:15px; }
+        }
+      `}</style>
       <div style={{ background:C.surface, borderBottom:`0.5px solid ${C.border}`,
           display:"flex", gap:0, overflowX:"auto" }}>
         {NAV.map(n => (
-          <button key={n.id} onClick={()=>{ setScreen(n.id); snd.menu(); }} style={{
-              padding:"10px 14px", fontSize:10, fontWeight:700, cursor:"pointer",
+          <button key={n.id} className="ks-nav-btn" onClick={()=>{ setScreen(n.id); snd.menu(); }} style={{
+              fontWeight:700, cursor:"pointer",
               background:"transparent", border:"none", letterSpacing:"0.06em",
               fontFamily:"'Courier New',monospace", whiteSpace:"nowrap",
               color: screen===n.id ? C.gold : C.textDim,
               borderBottom: screen===n.id ? `2px solid ${C.gold}` : "2px solid transparent",
           }}>
-            <span style={{ marginRight:4, fontSize:11 }}>{n.icon}</span>{n.label}
+            <span className="ks-nav-icon" style={{ marginRight:4 }}>{n.icon}</span>{n.label}
           </button>
         ))}
       </div>
