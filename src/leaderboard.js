@@ -28,7 +28,9 @@ export async function submitScore(playerId, name, score, level) {
       ts: serverTimestamp(),
     });
   } catch (err) {
-    console.error("submitScore failed:", err);
+    // A rejected update because this game's score didn't beat the player's
+    // stored best is expected/routine, not a real failure — don't log it.
+    if (err?.code !== "permission-denied") console.error("submitScore failed:", err);
   }
 }
 

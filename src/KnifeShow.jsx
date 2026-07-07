@@ -2286,7 +2286,6 @@ export default function App() {
   }, [gameOverInfo]);
 
   function onGameEnd(score, level) {
-    const isNewBest = score > save.stats.score;
     upd(p => {
       p.stats.score = Math.max(p.stats.score, score);
       p.stats.games++;
@@ -2294,7 +2293,10 @@ export default function App() {
       return p;
     });
     setGameOverInfo({ score, level });
-    if (isNewBest) submitScore(save.playerId, save.name, score, level);
+    // Submit every game — Firestore's own rules decide whether it actually
+    // beats this player's stored best, so a stale/pre-existing local score
+    // can never block a legitimate first sync.
+    if (score > 0) submitScore(save.playerId, save.name, score, level);
   }
 
   // ── Bonus apple hit mid-game — instant coin reward, doesn't wait for game end ──
