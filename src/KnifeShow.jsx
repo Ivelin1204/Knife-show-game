@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { submitScore, fetchTopScores } from "./leaderboard.js";
+import {
+  IconTarget, IconMap, IconDagger, IconCart, IconGift, IconTrophy, IconChart, IconGear,
+  IconCoin, IconLog, IconColumns, IconSkyline, IconVolcano, IconGalaxy,
+  IconBox, IconCrate, IconOrb, IconLock,
+} from "./icons.jsx";
 
 // ─── DESIGN TOKENS ───────────────────────────────────────────────────────────
 // Dark showroom palette: near-black walls, warm gold accents, coloured rarity
@@ -103,11 +108,11 @@ const KNIVES = [
 
 // ─── CRATES ───────────────────────────────────────────────────────────────────
 const CRATES = [
-  { id:"c_standard", name:"Standard Case",  price:100,  icon:"📦",
+  { id:"c_standard", name:"Standard Case",  price:100,  icon:IconBox,
     weights:{ common:0.60, uncommon:0.30, rare:0.09, epic:0.01, legendary:0, mythic:0 }},
-  { id:"c_pro",      name:"Pro Case",        price:300, icon:"🗃️",
+  { id:"c_pro",      name:"Pro Case",        price:300, icon:IconCrate,
     weights:{ common:0.15, uncommon:0.28, rare:0.32, epic:0.18, mythic:0.065, legendary:0.005 }},
-  { id:"c_elite",    name:"Elite Case",     price:700, icon:"🔮",
+  { id:"c_elite",    name:"Elite Case",     price:700, icon:IconOrb,
     weights:{ common:0, uncommon:0.04, rare:0.15, epic:0.36, mythic:0.38, legendary:0.07 }},
 ];
 
@@ -117,7 +122,7 @@ const CRATES = [
 // Difficulty and visual complexity both climb with tier.
 const MAPS = [
   // ── TIER 1 — Practice Yard ──────────────────────────────────────────────
-  { id:"yard", name:"Practice Yard", icon:"🪵", unlockScore:0, speedMod:1.08, levelReward:2,
+  { id:"yard", name:"Practice Yard", icon:IconLog, unlockScore:0, speedMod:1.08, levelReward:2,
     blurb:"Where every thrower starts. Plain, calm, forgiving.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -148,7 +153,7 @@ const MAPS = [
     }},
 
   // ── TIER 2 — Exhibition Hall ─────────────────────────────────────────────
-  { id:"hall", name:"Exhibition Hall", icon:"🏛️", unlockScore:20, speedMod:1.20, levelReward:4,
+  { id:"hall", name:"Exhibition Hall", icon:IconColumns, unlockScore:20, speedMod:1.20, levelReward:4,
     blurb:"Marble floors and velvet ropes. Crowds are starting to gather.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -206,7 +211,7 @@ const MAPS = [
     }},
 
   // ── TIER 3 — Neon District ────────────────────────────────────────────────
-  { id:"neon", name:"Neon District", icon:"🌆", unlockScore:40, speedMod:1.34, levelReward:6,
+  { id:"neon", name:"Neon District", icon:IconSkyline, unlockScore:40, speedMod:1.34, levelReward:6,
     blurb:"Rooftop throws under a buzzing skyline. Faster. Louder. Brighter.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -358,7 +363,7 @@ const MAPS = [
     }},
 
   // ── TIER 4 — Volcanic Forge ───────────────────────────────────────────────
-  { id:"forge", name:"Volcanic Forge", icon:"🌋", unlockScore:60, speedMod:1.50, levelReward:8,
+  { id:"forge", name:"Volcanic Forge", icon:IconVolcano, unlockScore:60, speedMod:1.50, levelReward:8,
     blurb:"Molten light, hammering heat. Only steady hands survive here.",
     drawBackground(ctx,W,H,t,CX,CY){
       const g=ctx.createLinearGradient(0,0,0,H);
@@ -581,7 +586,7 @@ const MAPS = [
     }},
 
   // ── TIER 5 — Celestial Arena ─────────────────────────────────────────────
-  { id:"celestial", name:"Celestial Arena", icon:"🌌", unlockScore:80, speedMod:1.68, levelReward:10,
+  { id:"celestial", name:"Celestial Arena", icon:IconGalaxy, unlockScore:80, speedMod:1.68, levelReward:10,
     blurb:"The final stage. Stars, gold, and a crowd that never blinks.",
     drawBackground(ctx,W,H,t,CX,CY){
       // Deep space gradient
@@ -2098,8 +2103,9 @@ function CaseModal({ crate, onCharge, onResult, onClose }) {
         {phase !== "ready" && (
           <>
             <div style={{ fontWeight:700, fontSize:15, color:C.gold, marginBottom:2,
-                letterSpacing:"0.08em", fontFamily:"'Courier New',monospace" }}>
-              {crate.icon} {crate.name.toUpperCase()}
+                letterSpacing:"0.08em", fontFamily:"'Courier New',monospace",
+                display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
+              <crate.icon size={16} /> {crate.name.toUpperCase()}
             </div>
             <div style={{ fontSize:11, color:C.textDim, marginBottom:16 }}>
               🪙 {crate.price} to open
@@ -2405,14 +2411,14 @@ export default function App() {
   )[0] || equippedKnife;
 
   const NAV = [
-    { id:"play",      label:"Play",     icon:"🎮" },
-    { id:"maps",      label:"Maps",     icon:"🗺️" },
-    { id:"inventory", label:"Knives",   icon:"🗡️" },
-    { id:"shop",      label:"Shop",     icon:"🛒" },
-    { id:"cases",     label:"Cases",    icon:"🎁" },
-    { id:"board",     label:"Scores",   icon:"🏆" },
-    { id:"stats",     label:"Stats",    icon:"📊" },
-    { id:"settings",  label:"Settings", icon:"⚙️" },
+    { id:"play",      label:"Play",     icon:IconTarget },
+    { id:"maps",      label:"Maps",     icon:IconMap },
+    { id:"inventory", label:"Knives",   icon:IconDagger },
+    { id:"shop",      label:"Shop",     icon:IconCart },
+    { id:"cases",     label:"Cases",    icon:IconGift },
+    { id:"board",     label:"Scores",   icon:IconTrophy },
+    { id:"stats",     label:"Stats",    icon:IconChart },
+    { id:"settings",  label:"Settings", icon:IconGear },
   ];
 
   return (
@@ -2446,10 +2452,12 @@ export default function App() {
         .ks-topbar { height:44px; padding:0 14px; }
         .ks-topbar-title { font-size:14px; }
         .ks-topbar-coins { font-size:13px; padding:3px 12px; }
+        .ks-topbar-coins .ks-coin-icon { width:14px; height:14px; }
         @media (max-width:899px) {
           .ks-topbar { height:64px; padding:0 18px; }
           .ks-topbar-title { font-size:19px; }
           .ks-topbar-coins { font-size:16px; padding:6px 16px; }
+          .ks-topbar-coins .ks-coin-icon { width:17px; height:17px; }
         }
       `}</style>
       <div className="ks-topbar" style={{ background:C.surface, borderBottom:`0.5px solid ${C.border}`,
@@ -2466,18 +2474,18 @@ export default function App() {
         )}
         <div className="ks-topbar-coins" style={{ fontFamily:"'Courier New',monospace", fontWeight:700,
             color:C.gold, background:C.goldDim+"33", borderRadius:5,
-            border:`0.5px solid ${C.goldDim}` }}>
-          🪙 {save.coins}
+            border:`0.5px solid ${C.goldDim}`, display:"inline-flex", alignItems:"center", gap:6 }}>
+          <IconCoin className="ks-coin-icon" /> {save.coins}
         </div>
       </div>
 
       {/* ── NAV ── */}
       <style>{`
         .ks-nav-btn { padding:10px 14px; font-size:10px; }
-        .ks-nav-btn .ks-nav-icon { font-size:11px; }
+        .ks-nav-btn .ks-nav-icon { width:12px; height:12px; }
         @media (max-width:899px) {
           .ks-nav-btn { padding:14px 17px; font-size:14px; }
-          .ks-nav-btn .ks-nav-icon { font-size:16px; }
+          .ks-nav-btn .ks-nav-icon { width:17px; height:17px; }
         }
       `}</style>
       <div style={{ background:C.surface, borderBottom:`0.5px solid ${C.border}`,
@@ -2489,8 +2497,9 @@ export default function App() {
               fontFamily:"'Courier New',monospace", whiteSpace:"nowrap",
               color: screen===n.id ? C.gold : C.textDim,
               borderBottom: screen===n.id ? `2px solid ${C.gold}` : "2px solid transparent",
+              display:"inline-flex", alignItems:"center",
           }}>
-            <span className="ks-nav-icon" style={{ marginRight:4 }}>{n.icon}</span>{n.label}
+            <n.icon className="ks-nav-icon" style={{ marginRight:5, flexShrink:0 }} />{n.label}
           </button>
         ))}
       </div>
@@ -2777,8 +2786,8 @@ export default function App() {
                       opacity: locked ? 0.5 : 1,
                       display:"flex", alignItems:"center", gap:14,
                   }}>
-                    <div style={{ fontSize:30, minWidth:38, textAlign:"center" }}>
-                      {locked ? "🔒" : m.icon}
+                    <div style={{ minWidth:38, display:"flex", justifyContent:"center", color: active ? C.gold : C.textMid }}>
+                      {locked ? <IconLock size={26} /> : <m.icon size={26} />}
                     </div>
                     <div style={{ flex:1 }}>
                       <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:3 }}>
@@ -2919,7 +2928,9 @@ export default function App() {
                 <div key={c.id} style={{ border:`0.5px solid ${C.borderHi}`, borderRadius:10,
                     padding:"16px 14px", background:C.surface, minHeight:230,
                     display:"flex", flexDirection:"column" }}>
-                  <div style={{ fontSize:36, textAlign:"center", marginBottom:8 }}>{c.icon}</div>
+                  <div style={{ display:"flex", justifyContent:"center", marginBottom:8, color:C.gold }}>
+                    <c.icon size={36} />
+                  </div>
                   <div style={{ fontWeight:700, fontSize:13, color:C.text, marginBottom:8,
                       textAlign:"center", fontFamily:"'Courier New',monospace",
                       letterSpacing:"0.06em" }}>{c.name.toUpperCase()}</div>
