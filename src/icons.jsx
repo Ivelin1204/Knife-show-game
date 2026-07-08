@@ -159,3 +159,19 @@ export function IconLock(props) {
     <path d="M12 16.3v1.6" />
   </Svg>;
 }
+
+// Filled (not outline) — used for the apple bonus toasts, colorable per
+// apple kind (plain red vs. the rarer golden apple) rather than relying on
+// the emoji's fixed native color.
+export function IconApple({ size = 16, color = "#D6432C", style, ...rest }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={style} {...rest}>
+      <path
+        d="M12 9.2c-.5-.4-1.2-.7-2-.7-3 0-5.3 2.6-5.3 6.1 0 3.9 2.7 8 5.6 8 .9 0 1.3-.4 1.7-.4s.8.4 1.7.4c2.9 0 5.6-4.1 5.6-8 0-3.5-2.3-6.1-5.3-6.1-.8 0-1.5.3-2 .7Z"
+        fill={color}
+      />
+      <path d="M12 9.2V6.4" stroke="#6b4226" strokeWidth="1.4" strokeLinecap="round" fill="none" />
+      <path d="M12 6.6c.3-1.3 1.7-2.2 3-2 .1 1.3-1 2.6-3 2Z" fill="#3f8f3a" />
+    </svg>
+  );
+}

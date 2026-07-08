@@ -3,7 +3,7 @@ import { submitScore, fetchTopScores } from "./leaderboard.js";
 import {
   IconTarget, IconMap, IconDagger, IconCart, IconGift, IconTrophy, IconChart, IconGear,
   IconCoin, IconLog, IconColumns, IconSkyline, IconVolcano, IconGalaxy,
-  IconBox, IconCrate, IconOrb, IconLock,
+  IconBox, IconCrate, IconOrb, IconLock, IconApple,
 } from "./icons.jsx";
 
 // ─── DESIGN TOKENS ───────────────────────────────────────────────────────────
@@ -2313,7 +2313,15 @@ export default function App() {
   // ── Bonus apple hit mid-game — instant coin reward, doesn't wait for game end ──
   function onAppleCoins(amount, source = "apple") {
     upd(p => { p.coins += amount; return p; });
-    toast$(source === "level" ? `Level bonus! +${amount} 🪙` : source === "goldApple" ? `Golden apple bonus! +${amount} 🪙` : `🍎 Apple bonus! +${amount} 🪙`, true);
+    const msg = source === "level"
+      ? `Level bonus! +${amount} 🪙`
+      : (
+        <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
+          <IconApple size={15} color={source === "goldApple" ? "#F0C34A" : "#D6432C"} />
+          {source === "goldApple" ? "Golden apple" : "Apple"} bonus! +{amount} 🪙
+        </span>
+      );
+    toast$(msg, true);
   }
 
   // ── Daily reward ──
